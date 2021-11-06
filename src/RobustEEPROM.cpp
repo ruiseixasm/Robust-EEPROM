@@ -97,19 +97,74 @@ RobustEEPROM::RobustEEPROM (DummyEEPROM* const dummy_eeprom) {
 
 uint16_t RobustEEPROM::length () {
 
+    uint16_t useful_length = 0;
+    uint8_t temp_byte = 0;
 
+    if (dummy_eeprom == nullptr) {
+        for (uint16_t i = firstByte + totalDataBytes + totalControlBytes - 1; i >= firstByte + totalDataBytes - 1; i--) {
+            temp_byte = EEPROM.read(i);
+            for (int b = 0; b < 8; b++) {
+                useful_length += temp_byte >> b & 0b00000001;
+            }
+        }
+    } else {
+        for (uint16_t i = firstByte + totalDataBytes + totalControlBytes - 1; i >= firstByte + totalDataBytes - 1; i--) {
+            temp_byte = dummy_eeprom->read(i);
+            for (int b = 0; b < 8; b++) {
+                useful_length += temp_byte >> b & 0b00000001;
+            }
+        }
+    }
+
+    return useful_length;
+
+}
+
+uint16_t RobustEEPROM::absolutelength () {
+
+    return totalDataBytes + totalControlBytes;
+
+}
+
+uint16_t RobustEEPROM::datalength () {
+
+    return totalDataBytes;
+
+}
+
+uint16_t RobustEEPROM::controllength () {
+
+    return totalControlBytes;
 
 }
 
 uint8_t RobustEEPROM::read (uint16_t read_byte) {
 
+    if (dummy_eeprom == nullptr) {
+        /* code */
+    } else {
 
+    }
+
+}
+
+void RobustEEPROM::write (uint16_t write_byte, uint8_t data) {
+
+    if (dummy_eeprom == nullptr) {
+        /* code */
+    } else {
+
+    }
 
 }
 
 void RobustEEPROM::update (uint16_t write_byte, uint8_t data) {
 
+    if (dummy_eeprom == nullptr) {
+        /* code */
+    } else {
 
+    }
 
 }
 
@@ -119,6 +174,6 @@ uint16_t RobustEEPROM::reset () {
         /* code */
     } else {
 
-    }    
+    }
 
 }
