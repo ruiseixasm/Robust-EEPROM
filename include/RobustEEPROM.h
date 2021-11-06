@@ -37,7 +37,11 @@ class RobustEEPROM {
         RobustEEPROM(uint16_t, uint16_t, DummyEEPROM*);
         RobustEEPROM(DummyEEPROM*);
         uint16_t length();
+        uint16_t absolutelength();
+        uint16_t datalength();
+        uint16_t controllength();
         uint8_t read(uint16_t);
+        void write(uint16_t, uint8_t);
         void update(uint16_t, uint8_t);
         uint16_t reset();
 
