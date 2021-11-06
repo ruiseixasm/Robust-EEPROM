@@ -115,6 +115,10 @@ void RobustEEPROM::update (uint16_t write_byte, uint8_t data) {
 
 uint16_t RobustEEPROM::reset () {
 
+    if (dummy_eeprom == nullptr) {
+        /* code */
+    } else {
 
+    }    
 
 }
