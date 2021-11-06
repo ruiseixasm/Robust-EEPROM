@@ -75,8 +75,23 @@ RobustEEPROM::RobustEEPROM (uint16_t firstByte=0, uint16_t lengthBytes=EEPROM.le
     totalControlBytes = ceil(lengthBytes/9) + 2;
     totalDataBytes = lengthBytes - totalControlBytes;
 
+}
 
+RobustEEPROM::RobustEEPROM (DummyEEPROM* const dummy_eeprom) {
 
+    RobustEEPROM(0, dummy_eeprom->length(), dummy_eeprom);    
+
+    // uint16_t totalControlBytes;
+    // uint16_t totalDataBytes;
+    // uint16_t lastByteBytes;
+
+    // this->dummy_eeprom = dummy_eeprom;
+
+    // firstByte = 0;
+    // lastDataByte = firstByte;
+
+    // totalControlBytes = ceil(this->dummy_eeprom->length()/9) + 2;
+    // totalDataBytes = this->dummy_eeprom->length() - totalControlBytes;
 
 }
 

@@ -35,6 +35,7 @@ class RobustEEPROM {
         uint16_t lastDataByte;
     public:
         RobustEEPROM(uint16_t, uint16_t, DummyEEPROM*);
+        RobustEEPROM(DummyEEPROM*);
         uint16_t length();
         uint8_t read(uint16_t);
         void update(uint16_t, uint8_t);
