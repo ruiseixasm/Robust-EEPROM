@@ -23,9 +23,6 @@ void loop() {
             robust_eeprom->update(i, rand() % 20);
         }
     
-            // Serial.println(dummy_eeprom->length());
-            // Serial.println(robust_eeprom->length());
-
         if (data_health != (int)floor(100*robust_eeprom->length()/robust_eeprom->datalength())) {
 
             data_health = (int)floor(100*robust_eeprom->length()/robust_eeprom->datalength());
@@ -37,11 +34,11 @@ void loop() {
                 stop = true;
         }
         
-        stop = true;
+        // stop = true;
 
     }
 
-    // Serial.println(dummy_eeprom->length());
-    // delay (1000);
+    Serial.println(dummy_eeprom->length());
+    delay (5000);
 
 }

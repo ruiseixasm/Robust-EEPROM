@@ -74,8 +74,6 @@ Robust_EEPROM::Robust_EEPROM (uint16_t firstByte, uint16_t lengthBytes, Dummy_EE
 
     } else {
 
-        Serial.println(dummy_eeprom->length());
-
         totalBytes = mathFunctions::min_uint(lengthBytes, dummy_eeprom->length());
         this->firstByte = mathFunctions::min_uint(firstByte, dummy_eeprom->length() - lengthBytes);
 
@@ -164,36 +162,45 @@ uint16_t Robust_EEPROM::controllength () {
 
 uint16_t Robust_EEPROM::absolutebyte (uint16_t relative_byte) {
 
-    int16_t absolute_byte = mathFunctions::max_uint(relative_byte, firstByte);
+    uint16_t absolute_byte = 0;
     uint8_t temp_byte = 0;
-
+    
     if (dummy_eeprom == nullptr) {
-        for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + absolutelength() - 1 - absolute_byte; i--) {
-            if (i < firstByte + datalength() + 2 - 1)
-                return lastDataByte;
+        for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + datalength() + 2 - 1; i--) {
             temp_byte = EEPROM.read(i);
             for (int b = 0; b < 8; b++) {
-                absolute_byte += temp_byte >> b & 0b00000001; // offsets all failed bytes
+                relative_byte += temp_byte >> b & 0b00000001; // offsets all failed bytes
+                if (relative_byte == 0) {
+                    return absolute_byte;
+                } else {
+                    relative_byte--;
+                    absolute_byte++;
+                }
+
             }
         }
-        return absolute_byte;
     } else {
-        for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + absolutelength() - 1 - absolute_byte; i--) {
-            if (i < firstByte + datalength() + 2 - 1)
-                return lastDataByte;
+        for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + datalength() + 2 - 1; i--) {
             temp_byte = dummy_eeprom->read(i);
             for (int b = 0; b < 8; b++) {
-                absolute_byte += temp_byte >> b & 0b00000001; // offsets all failed bytes
+                relative_byte += temp_byte >> b & 0b00000001; // offsets all failed bytes
+                if (relative_byte == 0) {
+                    return absolute_byte;
+                } else {
+                    relative_byte--;
+                    absolute_byte++;
+                }
+
             }
         }
-        return absolute_byte;
     }
+    return absolute_byte;
 
 }
 
 uint8_t Robust_EEPROM::read (uint16_t read_byte) {
 
-    lastDataByte = mathFunctions::min_uint(read_byte, firstByte + totalDataBytes - 1);
+    read_byte = mathFunctions::min_uint(read_byte, firstByte);
     if (dummy_eeprom == nullptr) {
         return EEPROM.read(absolutebyte(read_byte));
     } else {
@@ -204,25 +211,81 @@ uint8_t Robust_EEPROM::read (uint16_t read_byte) {
 
 void Robust_EEPROM::write (uint16_t write_byte, uint8_t data) {
 
-    lastDataByte = mathFunctions::min_uint(write_byte, firstByte + totalDataBytes - 1);
-    if (dummy_eeprom == nullptr) {
-        EEPROM.write(absolutebyte(write_byte), data);
-    } else {
-        dummy_eeprom->write(absolutebyte(write_byte), data);
-    }
+    int tryouts = 0;
+    write_byte = mathFunctions::max_uint(write_byte, firstByte);
+    write_byte = mathFunctions::min_uint(write_byte, firstByte + totalDataBytes - 1);
+    do {
+        if (dummy_eeprom == nullptr) {
+            EEPROM.write(absolutebyte(write_byte), data);
+        } else {
+            dummy_eeprom->write(absolutebyte(write_byte), data);
+        }
+        if (tryouts == 5) {
+            disablebyte(write_byte);
+            tryouts = 0;
+        }
+        tryouts++;
+    } while (data != read(write_byte));
+
     lastDataByte = mathFunctions::max_uint(write_byte, lastDataByte);
 
 }
 
 void Robust_EEPROM::update (uint16_t update_byte, uint8_t data) {
 
-    lastDataByte = mathFunctions::min_uint(update_byte, firstByte + totalDataBytes - 1);
-    if (dummy_eeprom == nullptr) {
-        EEPROM.update(absolutebyte(update_byte), data);
-    } else {
-        dummy_eeprom->update(absolutebyte(update_byte), data);
-    }
+    int tryouts = 0;
+    update_byte = mathFunctions::max_uint(update_byte, firstByte);
+    update_byte = mathFunctions::min_uint(update_byte, firstByte + totalDataBytes - 1);
+    do {
+        if (dummy_eeprom == nullptr) {
+            EEPROM.update(absolutebyte(update_byte), data);
+        } else {
+            dummy_eeprom->update(absolutebyte(update_byte), data);
+        }
+        if (tryouts == 5) {
+            disablebyte(update_byte);
+            tryouts = 0;
+        }
+        tryouts++;
+    } while (data != read(update_byte));
+
     lastDataByte = mathFunctions::max_uint(update_byte, lastDataByte);
+
+}
+
+void Robust_EEPROM::disablebyte (uint16_t relative_byte) {
+
+    uint8_t temp_byte = 0;
+    
+    if (dummy_eeprom == nullptr) {
+        for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + datalength() + 2 - 1; i--) {
+            temp_byte = EEPROM.read(i);
+            for (int b = 0; b < 8; b++) {
+                relative_byte += temp_byte >> b & 0b00000001; // offsets all failed bytes
+                if (relative_byte == 0) {
+                    temp_byte |= 0b00000001 << b;
+                    EEPROM.update(i, temp_byte);
+                    return;
+                } else {
+                    relative_byte--;
+                }
+            }
+        }
+    } else {
+        for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + datalength() + 2 - 1; i--) {
+            temp_byte = dummy_eeprom->read(i);
+            for (int b = 0; b < 8; b++) {
+                relative_byte += temp_byte >> b & 0b00000001; // offsets all failed bytes
+                if (relative_byte == 0) {
+                    temp_byte |= 0b00000001 << b;
+                    dummy_eeprom->update(i, temp_byte);
+                    return;
+                } else {
+                    relative_byte--;
+                }
+            }
+        }
+    }
 
 }
 
