@@ -26,20 +26,21 @@ uint16_t mathFunctions::ceil_log2 (uint16_t first) {
     return log2;
 }
 
-Dummy_EEPROM::Dummy_EEPROM (uint16_t size=1024) {
+Dummy_EEPROM::Dummy_EEPROM (size_t size) {
 
     dummy_bytes = new uint8_t[size];
     ttl_bytes = new uint16_t[size];
+    this->size = size;
 
-    for (uint16_t b = 0; b < size; b++) {
-        dummy_bytes[b] = (uint8_t)floor(rand() * 256);
-        // ttl_bytes[b] = 65535 - floor(rand() * 30000);    // maximum for uint16_t = 65535
+    for (size_t b = 0; b < size; b++) {
+        dummy_bytes[b] = (uint8_t)(rand() % 256);
+        ttl_bytes[b] = (uint16_t)(65535 - rand() % 30000);    // maximum for uint16_t = 65535
     }
 
 }
 
 uint16_t Dummy_EEPROM::length () {
-    return sizeof dummy_bytes;
+    return size;
 }
 
 uint8_t Dummy_EEPROM::read (uint16_t read_byte) {
@@ -60,38 +61,48 @@ void Dummy_EEPROM::update (uint16_t update_byte, uint8_t data) {
         write(update_byte, data);
 }
 
-Robust_EEPROM::Robust_EEPROM (uint16_t firstByte=0, uint16_t lengthBytes=EEPROM.length(), Dummy_EEPROM* const dummy_eeprom = nullptr) {
+Robust_EEPROM::Robust_EEPROM (uint16_t firstByte, uint16_t lengthBytes, Dummy_EEPROM* const dummy_eeprom) {
+
+    Serial.println("FINAL");
 
     uint16_t totalControlBytes;
     uint16_t totalDataBytes;
     uint16_t lastByteBytes;
 
     this->dummy_eeprom = dummy_eeprom;
+    
+    if (dummy_eeprom == nullptr) {
 
-    lengthBytes = mathFunctions::min_uint(lengthBytes, EEPROM.length());
-    firstByte = mathFunctions::min_uint(firstByte, EEPROM.length() - lengthBytes);
+        lengthBytes = mathFunctions::min_uint(lengthBytes, EEPROM.length());
+        firstByte = mathFunctions::min_uint(firstByte, EEPROM.length() - lengthBytes);
+
+    } else {
+
+        Serial.println(this->dummy_eeprom->length());
+
+        lengthBytes = mathFunctions::min_uint(lengthBytes, dummy_eeprom->length());
+        firstByte = mathFunctions::min_uint(firstByte, dummy_eeprom->length() - lengthBytes);
+
+    }
+
     lastDataByte = firstByte;
 
-    totalControlBytes = ceil(lengthBytes/9) + 2;
+    totalControlBytes = ceil((double)lengthBytes/9) + 2;
     totalDataBytes = lengthBytes - totalControlBytes;
 
 }
 
 Robust_EEPROM::Robust_EEPROM (Dummy_EEPROM* const dummy_eeprom) {
 
-    Robust_EEPROM(0, dummy_eeprom->length(), dummy_eeprom);    
+    Serial.println("dummy_eeprom");
+    Robust_EEPROM(0, dummy_eeprom->length(), dummy_eeprom);
 
-    // uint16_t totalControlBytes;
-    // uint16_t totalDataBytes;
-    // uint16_t lastByteBytes;
+}
 
-    // this->dummy_eeprom = dummy_eeprom;
+Robust_EEPROM::Robust_EEPROM () {
 
-    // firstByte = 0;
-    // lastDataByte = firstByte;
-
-    // totalControlBytes = ceil(this->dummy_eeprom->length()/9) + 2;
-    // totalDataBytes = this->dummy_eeprom->length() - totalControlBytes;
+    Serial.println("EEPROM");
+    Robust_EEPROM(0, EEPROM.length(), nullptr);
 
 }
 
@@ -100,6 +111,8 @@ uint16_t Robust_EEPROM::length () {
     uint16_t failed_bytes = 0;
     uint8_t temp_byte = 0;
 
+        Serial.println(this->dummy_eeprom->length());
+
     if (dummy_eeprom == nullptr) {
         for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + datalength() + 2 - 1; i--) {
             temp_byte = EEPROM.read(i);
@@ -107,6 +120,13 @@ uint16_t Robust_EEPROM::length () {
                 failed_bytes += temp_byte >> b & 0b00000001;
             }
         }
+            Serial.print((uint16_t)failed_bytes);
+            Serial.print(" ");
+            Serial.print((uint16_t)temp_byte);
+            Serial.print(" ");
+            Serial.print((uint16_t)absolutelength());
+            Serial.print(" ");
+            Serial.print((uint16_t)datalength());
     } else {
         for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + datalength() + 2 - 1; i--) {
             temp_byte = dummy_eeprom->read(i);
