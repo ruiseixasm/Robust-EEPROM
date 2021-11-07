@@ -19,26 +19,29 @@ void loop() {
 
     if (!stop) {
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             robust_eeprom->update(i, rand() % 20);
         }
     
         if (data_health != (int)floor(100*robust_eeprom->length()/robust_eeprom->datalength())) {
 
             data_health = (int)floor(100*robust_eeprom->length()/robust_eeprom->datalength());
-            Serial.println(robust_eeprom->length());
-            Serial.println(robust_eeprom->datalength());
             Serial.print(data_health);
             Serial.println("%");
-            if (data_health < 90)
+            if (data_health < 50) {
                 stop = true;
+                Serial.println("--------------------------");
+                Serial.println(robust_eeprom->length());
+                Serial.println(robust_eeprom->datalength());
+                Serial.println(robust_eeprom->lastdatabyte());
+                Serial.println(robust_eeprom->absolutebyte(robust_eeprom->lastdatabyte()));
+            }
         }
         
         // stop = true;
 
     }
 
-    Serial.println(dummy_eeprom->length());
-    delay (5000);
+    // delay (50);
 
 }

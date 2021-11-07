@@ -42,10 +42,12 @@ class Robust_EEPROM {
         uint16_t absolutelength();
         uint16_t datalength();
         uint16_t controllength();
+        uint16_t lastdatabyte();
         uint16_t absolutebyte(uint16_t);
         uint8_t read(uint16_t);
         void write(uint16_t, uint8_t);
         void update(uint16_t, uint8_t);
+        void offsetright(uint16_t);
         void disablebyte(uint16_t);
         void fullreset();
 
