@@ -16,10 +16,9 @@ class Dummy_EEPROM {
     private:
         uint8_t *dummy_bytes;
         uint16_t *ttl_bytes;
-        // uint16_t long_stuff[1024]; // Too much memory allocation!
-        size_t size;
+        uint16_t size;
     public:
-        Dummy_EEPROM(size_t);
+        Dummy_EEPROM(uint16_t);
         uint16_t length();
         uint8_t read(uint16_t);
         void write(uint16_t, uint8_t);
@@ -29,8 +28,8 @@ class Dummy_EEPROM {
 
 class Robust_EEPROM {
     private:
-        Dummy_EEPROM *dummy_eeprom = nullptr;
-        uint8_t *working_bytes;
+        Dummy_EEPROM *dummy_eeprom;
+        uint16_t totalBytes;
         uint16_t totalControlBytes;
         uint16_t totalDataBytes;
         uint16_t firstByte;

@@ -11,7 +11,7 @@ void setup() {
     Serial.println("Preparing!");
     dummy_eeprom = new Dummy_EEPROM(1024/4);
     robust_eeprom = new Robust_EEPROM(dummy_eeprom);
-    Serial.println("");
+    robust_eeprom->fullreset();
     Serial.println("Starting!");
 }
 
@@ -23,6 +23,9 @@ void loop() {
             robust_eeprom->update(i, rand() % 20);
         }
     
+            // Serial.println(dummy_eeprom->length());
+            // Serial.println(robust_eeprom->length());
+
         if (data_health != (int)floor(100*robust_eeprom->length()/robust_eeprom->datalength())) {
 
             data_health = (int)floor(100*robust_eeprom->length()/robust_eeprom->datalength());
