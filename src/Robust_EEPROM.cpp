@@ -32,8 +32,8 @@ Dummy_EEPROM::Dummy_EEPROM (uint16_t size=1024) {
     ttl_bytes = new uint16_t[size];
 
     for (uint16_t b = 0; b < size; b++) {
-        dummy_bytes[b] = floor(rand() * 256);
-        ttl_bytes[b] = 65535 - floor(rand() * 30000);    // maximum for uint16_t = 65535
+        dummy_bytes[b] = (uint8_t)floor(rand() * 256);
+        // ttl_bytes[b] = 65535 - floor(rand() * 30000);    // maximum for uint16_t = 65535
     }
 
 }
