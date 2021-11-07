@@ -1,10 +1,35 @@
-#include "RobustEEPROM.h"
+#include "Robust_EEPROM.h"
 
+int data_health = 0;
+bool stop = false;
+
+Dummy_EEPROM *dummy_eeprom;
+Robust_EEPROM *robust_eeprom;
 
 void setup() {
-  // put your setup code here, to run once:
+    Serial.begin(9600);
+    dummy_eeprom = new Dummy_EEPROM(1024);
+    robust_eeprom = new Robust_EEPROM(dummy_eeprom);
+    Serial.println("Starting!");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+
+    if (!stop) {
+
+        for (int i = 0; i < 100; i++) {
+            robust_eeprom->update(i, floor(rand() * 20));
+        }
+    
+        if (data_health != floor(100*robust_eeprom->length()/robust_eeprom->datalength())) {
+
+            data_health = floor(100*robust_eeprom->length()/robust_eeprom->datalength());
+            Serial.print(data_health);
+            Serial.println("%");
+            if (data_health < 90)            
+                stop = true;
+        }
+
+    }
+
 }
