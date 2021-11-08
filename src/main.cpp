@@ -1,5 +1,6 @@
 #include "Robust_EEPROM.h"
 
+int length = 0;
 int data_health = 0;
 bool stop = false;
 
@@ -13,22 +14,42 @@ void setup() {
     robust_eeprom = new Robust_EEPROM(dummy_eeprom);
     robust_eeprom->fullreset();
     Serial.println("Starting!");
+    delay(1000);
+    for (int i = 0; i < 10; i++) {
+        robust_eeprom->update(i, rand() % 256);
+    }
 }
 
 void loop() {
 
     if (!stop) {
 
-        for (int i = 0; i < 10; i++) {
-            robust_eeprom->update(i, rand() % 20);
+        for (int i = 0; i < 5; i++) {
+            robust_eeprom->update(i, rand() % 256);
+            // Serial.print(robust_eeprom->read(i));
+            // Serial.print(":");
         }
     
-        if (data_health != (int)floor(100*robust_eeprom->length()/robust_eeprom->datalength())) {
+        if (length != robust_eeprom->length()) {
 
             data_health = (int)floor(100*robust_eeprom->length()/robust_eeprom->datalength());
+            for (int i = 0; i < 10; i++) {
+                Serial.print(robust_eeprom->absolutebyte(i));
+                Serial.print(":");
+            }
+            Serial.println("");
+            for (int i = 0; i < 10; i++) {
+                Serial.print(robust_eeprom->read(i));
+                Serial.print(":");
+            }
+            Serial.println("");
+            Serial.print(robust_eeprom->length());
+            Serial.print(" ~ ");
+            Serial.print(length - robust_eeprom->length());
+            Serial.print(" = ");
             Serial.print(data_health);
             Serial.println("%");
-            if (data_health < 50) {
+            if (data_health < 10) {
                 stop = true;
                 Serial.println("--------------------------");
                 Serial.println(robust_eeprom->length());
@@ -36,6 +57,8 @@ void loop() {
                 Serial.println(robust_eeprom->lastdatabyte());
                 Serial.println(robust_eeprom->absolutebyte(robust_eeprom->lastdatabyte()));
             }
+            
+            length = robust_eeprom->length();
         }
         
         // stop = true;

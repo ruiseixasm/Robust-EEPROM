@@ -34,6 +34,7 @@ class Robust_EEPROM {
         uint16_t totalDataBytes;
         uint16_t firstByte;
         uint16_t lastDataByte;
+        uint16_t offsetDataByte = 0;
     public:
         Robust_EEPROM(uint16_t, uint16_t, Dummy_EEPROM*);
         Robust_EEPROM(Dummy_EEPROM*);

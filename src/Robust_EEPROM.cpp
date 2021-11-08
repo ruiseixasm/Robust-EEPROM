@@ -31,6 +31,7 @@ Dummy_EEPROM::Dummy_EEPROM (uint16_t size) {
     dummy_bytes = new uint8_t[size];
     ttl_bytes = new uint16_t[size];
     this->size = size;
+    srand(size*millis());
 
     for (uint16_t b = 0; b < size; b++) {
         dummy_bytes[b] = (uint8_t)(rand() % 256);
@@ -219,7 +220,7 @@ void Robust_EEPROM::write (uint16_t write_byte, uint8_t data) {
             dummy_eeprom->write(absolutebyte(write_byte), data);
         }
         if (tryouts == 5) {
-            offsetright(write_byte);
+            // offsetright(write_byte);
             disablebyte(write_byte);
             tryouts = 0;
         }
@@ -255,11 +256,45 @@ void Robust_EEPROM::update (uint16_t update_byte, uint8_t data) {
 
 void Robust_EEPROM::offsetright (uint16_t actual_byte) {
 
-    Serial.print("OFFSET RIGHT | ");
-    for (uint16_t i = lastDataByte; i >= actual_byte; i--) {
-        update(i + 1, read(i));
+    // Serial.print(" | OFFSET RIGHT:");
+    // Serial.print(actual_byte);
+    // Serial.print(":");
+    // Serial.print(lastDataByte);
+    // Serial.print(":");
+    // Serial.print(absolutebyte(actual_byte));
+    // Serial.print(":");
+    // Serial.print(absolutebyte(lastDataByte));
+    // Serial.println(":");
+    int tryouts = 0;
+    offsetDataByte++;
+    for (uint16_t i = lastDataByte + offsetDataByte; i >= actual_byte + offsetDataByte; i--) {
+        do {
+            // Serial.print(actual_byte);
+            // Serial.print(" - ");
+            // Serial.print(i - 1 - offsetDataByte + 1);
+            // Serial.print(":");
+            // Serial.print(i - offsetDataByte + 1);
+            // Serial.print(" ~ ");
+            // Serial.print(absolutebyte(i - 1));
+            // Serial.print(":");
+            // Serial.print(absolutebyte(i));
+            // Serial.print(" = ");
+            // Serial.println(read(i - 1));
+            if (dummy_eeprom == nullptr) {
+                EEPROM.update(absolutebyte(i), read(i - 1));
+            } else {
+                dummy_eeprom->update(absolutebyte(i), read(i - 1));
+            }
+            if (tryouts == 5) {
+                offsetright(i);
+                disablebyte(i);
+                tryouts = 0;
+            }
+            tryouts++;
+            // delay(1000);
+        } while (read(i) != read(i - 1));
     }
-
+    offsetDataByte--;
 }
 
 void Robust_EEPROM::disablebyte (uint16_t relative_byte) {
