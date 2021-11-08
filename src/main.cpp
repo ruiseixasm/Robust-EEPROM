@@ -49,7 +49,7 @@ void loop() {
             Serial.print(" = ");
             Serial.print(data_health);
             Serial.println("%");
-            if (data_health < 10) {
+            if (data_health < 70) {  // Last Percentage %
                 stop = true;
                 Serial.println("--------------------------");
                 Serial.println(robust_eeprom->length());

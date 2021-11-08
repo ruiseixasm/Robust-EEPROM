@@ -35,7 +35,7 @@ Dummy_EEPROM::Dummy_EEPROM (uint16_t size) {
 
     for (uint16_t b = 0; b < size; b++) {
         dummy_bytes[b] = (uint8_t)(rand() % 256);
-        ttl_bytes[b] = (uint16_t)(1000 - rand() % 800);    // maximum for uint16_t = 65535
+        ttl_bytes[b] = (uint16_t)(1000 - rand() % 500);    // maximum for uint16_t = 65535
     }
 
 }
@@ -162,6 +162,8 @@ uint16_t Robust_EEPROM::absolutebyte (uint16_t relative_byte) {
 
     uint16_t absolute_byte = 0;
     uint8_t temp_byte = 0;
+
+    // relative_byte += offsetDataByte;
     
     if (dummy_eeprom == nullptr) {
         for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + datalength() + 2 - 1; i--) {
@@ -256,30 +258,34 @@ void Robust_EEPROM::update (uint16_t update_byte, uint8_t data) {
 
 void Robust_EEPROM::offsetright (uint16_t actual_byte) {
 
-    // Serial.print(" | OFFSET RIGHT:");
-    // Serial.print(actual_byte);
-    // Serial.print(":");
-    // Serial.print(lastDataByte);
-    // Serial.print(":");
-    // Serial.print(absolutebyte(actual_byte));
-    // Serial.print(":");
-    // Serial.print(absolutebyte(lastDataByte));
-    // Serial.println(":");
-    int tryouts = 0;
+    int tryouts;
     offsetDataByte++;
-    for (uint16_t i = lastDataByte + offsetDataByte; i >= actual_byte + offsetDataByte; i--) {
+    for (uint16_t i = lastDataByte + offsetDataByte; i > actual_byte + 1; i--) {
+        tryouts = 0;
         do {
-            // Serial.print(actual_byte);
-            // Serial.print(" - ");
-            // Serial.print(i - 1 - offsetDataByte + 1);
-            // Serial.print(":");
-            // Serial.print(i - offsetDataByte + 1);
-            // Serial.print(" ~ ");
-            // Serial.print(absolutebyte(i - 1));
-            // Serial.print(":");
-            // Serial.print(absolutebyte(i));
-            // Serial.print(" = ");
-            // Serial.println(read(i - 1));
+
+            // if (true) {
+            
+            //     Serial.print(offsetDataByte);
+            //     Serial.print(" // ");
+            //     Serial.print(actual_byte);
+            //     Serial.print(":");
+            //     Serial.print(absolutebyte(actual_byte));
+            //     Serial.print(" - ");
+            //     Serial.print(i - 1);
+            //     Serial.print(":");
+            //     Serial.print(i);
+            //     Serial.print(" ~ ");
+            //     Serial.print(absolutebyte(i - 1));
+            //     Serial.print(":");
+            //     Serial.print(absolutebyte(i));
+            //     Serial.print(" = ");
+            //     Serial.print(read(i - 1));
+            //     Serial.print(":");
+            //     Serial.println(read(i));
+            
+            // }
+            
             if (dummy_eeprom == nullptr) {
                 EEPROM.update(absolutebyte(i), read(i - 1));
             } else {
