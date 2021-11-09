@@ -170,11 +170,11 @@ uint16_t Robust_EEPROM::absolutebyte (uint16_t relative_byte) {
     uint8_t temp_byte = 0;
 
     if (dummy_eeprom == nullptr) {
-        for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + datalength() + 2 - 1; i--) {
+        for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + totalDataBytes + 2 - 1; i--) {
             temp_byte = EEPROM.read(i);
             for (int b = 0; b < 8; b++) {
                 relative_byte += temp_byte >> b & 0b00000001; // offsets all failed bytes
-                if (relative_byte == 0) {
+                if (relative_byte == 0 || absolute_byte == firstByte + totalDataBytes - 1) {
                     return absolute_byte;
                 } else {
                     relative_byte--;
@@ -184,11 +184,11 @@ uint16_t Robust_EEPROM::absolutebyte (uint16_t relative_byte) {
             }
         }
     } else {
-        for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + datalength() + 2 - 1; i--) {
+        for (uint16_t i = firstByte + absolutelength() - 1; i >= firstByte + totalDataBytes + 2 - 1; i--) {
             temp_byte = dummy_eeprom->read(i);
             for (int b = 0; b < 8; b++) {
                 relative_byte += temp_byte >> b & 0b00000001; // offsets all failed bytes
-                if (relative_byte == 0) {
+                if (relative_byte == 0 || absolute_byte == firstByte + totalDataBytes - 1) {
                     return absolute_byte;
                 } else {
                     relative_byte--;
