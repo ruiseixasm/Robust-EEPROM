@@ -9,6 +9,7 @@ class mathFunctions {
         static uint16_t max_uint(uint16_t, uint16_t);
         static uint16_t min_uint(uint16_t, uint16_t);
         static uint16_t ceil_log2(uint16_t);
+        static uint16_t seed_generator(uint32_t=1000, uint32_t=50);
 };
 
 

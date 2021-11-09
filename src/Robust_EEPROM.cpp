@@ -23,12 +23,32 @@ uint16_t mathFunctions::ceil_log2 (uint16_t first) {
     return log2;
 }
 
+uint16_t mathFunctions::seed_generator (uint32_t total_duration, uint32_t fragmental_duration) {
+
+    uint16_t magic_number = 0;
+    uint32_t start_stamp = millis();
+    uint32_t actual_stamp = start_stamp;
+
+    while (labs(millis() - start_stamp) < total_duration) {
+        magic_number++;
+        if (labs(millis() - actual_stamp) >= fragmental_duration) {
+            if (analogRead(A0) % 2 == 0) {
+                magic_number /= 2;
+            } else {
+                magic_number *= 2;
+            }
+            actual_stamp = millis();
+        }
+    }
+    return magic_number;
+}
+
 Dummy_EEPROM::Dummy_EEPROM (uint16_t size) {
 
     dummy_bytes = new uint8_t[size];
     ttl_bytes = new uint16_t[size];
     this->size = size;
-    srand(size*millis());
+    srand(mathFunctions::seed_generator());
 
     for (uint16_t b = 0; b < size; b++) {
         dummy_bytes[b] = (uint8_t)(rand() % 256);
