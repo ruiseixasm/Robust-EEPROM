@@ -26,8 +26,6 @@ void loop() {
 
         for (int i = 0; i < 5; i++) {
             robust_eeprom->update(i, rand() % 256);
-            // Serial.print(robust_eeprom->read(i));
-            // Serial.print(":");
         }
     
         if (length != robust_eeprom->length()) {
@@ -61,10 +59,6 @@ void loop() {
             length = robust_eeprom->length();
         }
         
-        // stop = true;
-
     }
-
-    // delay (50);
 
 }

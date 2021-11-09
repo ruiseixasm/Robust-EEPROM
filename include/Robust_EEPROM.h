@@ -35,6 +35,10 @@ class Robust_EEPROM {
         uint16_t firstByte;
         uint16_t lastDataByte;
         uint16_t offsetDataByte = 0;
+        void offsetright(uint16_t);
+        void disablebyte(uint16_t);
+        void updatelastdatabyte(uint16_t);
+        uint16_t readlastdatabyte();
     public:
         Robust_EEPROM(uint16_t, uint16_t, Dummy_EEPROM*);
         Robust_EEPROM(Dummy_EEPROM*);
@@ -48,8 +52,6 @@ class Robust_EEPROM {
         uint8_t read(uint16_t);
         void write(uint16_t, uint8_t);
         void update(uint16_t, uint8_t);
-        void offsetright(uint16_t);
-        void disablebyte(uint16_t);
         void fullreset();
 
 };
