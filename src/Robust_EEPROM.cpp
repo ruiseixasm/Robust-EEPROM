@@ -235,9 +235,9 @@ void Robust_EEPROM::update (uint16_t update_byte, uint8_t data) {
     int tryouts = 0;
     while (read(update_byte) != data) {
         if (dummy_eeprom == nullptr) {
-            EEPROM.update(absolutebyte(update_byte), data);
+            EEPROM.write(absolutebyte(update_byte), data);
         } else {
-            dummy_eeprom->update(absolutebyte(update_byte), data);
+            dummy_eeprom->write(absolutebyte(update_byte), data);
         }
         if (tryouts == 5) {
             offsetright(update_byte);
@@ -252,34 +252,17 @@ void Robust_EEPROM::update (uint16_t update_byte, uint8_t data) {
 void Robust_EEPROM::offsetright (uint16_t actual_byte) {
 
     int tryouts;
-    for (uint16_t data_i = totalDataBytes - 1; data_i > actual_byte + 1; data_i--) {  // the actual_byte is destined to be overwritten (no need to offset)
+    // The actual_byte is destined to be overwritten so no offset needed for it,
+    // for the situation when it's called from a previous offset then
+    // the actual_byte offset was already performed by the previous offset.
+    for (uint16_t data_i = totalDataBytes - 1; data_i > actual_byte + 1; data_i--) {
         tryouts = 0; // needs to be reseted for each for
         while (read(data_i) != read(data_i - 1)) {
-
-            // if (true) {
-            
-            //     Serial.print(actual_byte);
-            //     Serial.print(":");
-            //     Serial.print(absolutebyte(actual_byte));
-            //     Serial.print(" - ");
-            //     Serial.print(data_i - 1);
-            //     Serial.print(":");
-            //     Serial.print(data_i);
-            //     Serial.print(" ~ ");
-            //     Serial.print(absolutebyte(data_i - 1));
-            //     Serial.print(":");
-            //     Serial.print(absolutebyte(data_i));
-            //     Serial.print(" = ");
-            //     Serial.print(read(data_i - 1));
-            //     Serial.print(":");
-            //     Serial.println(read(data_i));
-            
-            // }
             
             if (dummy_eeprom == nullptr) {
-                EEPROM.update(absolutebyte(data_i), read(data_i - 1));
+                EEPROM.write(absolutebyte(data_i), read(data_i - 1));
             } else {
-                dummy_eeprom->update(absolutebyte(data_i), read(data_i - 1));
+                dummy_eeprom->write(absolutebyte(data_i), read(data_i - 1));
             }
             if (tryouts == 5) {
                 offsetright(data_i);
@@ -287,7 +270,6 @@ void Robust_EEPROM::offsetright (uint16_t actual_byte) {
                 tryouts = 0;
             }
             tryouts++;
-            // delay(1000);
         }
     }
 }
