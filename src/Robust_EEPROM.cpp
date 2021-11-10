@@ -32,7 +32,7 @@ uint16_t mathFunctions::seed_generator (uint32_t total_duration, uint32_t fragme
     while (labs(millis() - start_stamp) < total_duration) {
         magic_number++;
         if (labs(millis() - actual_stamp) >= fragmental_duration) {
-            if (analogRead(A0) % 2 == 0) {
+            if (analogRead(0) % 2 == 0) {
                 magic_number /= 2;
             } else {
                 magic_number *= 2;
