@@ -119,9 +119,8 @@ Robust_EEPROM::Robust_EEPROM () {
 }
 
 void Robust_EEPROM::initiateEEPROM () {
-    totalControlBytes = (uint16_t)ceil((double)(totalBytes - 2)/9) + 2;
+    totalControlBytes = (uint16_t)ceil((double)totalBytes/9);
     totalDataBytes = totalBytes - totalControlBytes;
-    lastDataByte = readlastdatabyte();
 }
 
 uint16_t Robust_EEPROM::length () {
@@ -159,10 +158,6 @@ uint16_t Robust_EEPROM::datalength () {
 
 uint16_t Robust_EEPROM::controllength () {
     return totalControlBytes;
-}
-
-uint16_t Robust_EEPROM::lastdatabyte () {
-    return lastDataByte;
 }
 
 uint16_t Robust_EEPROM::absolutebyte (uint16_t relative_byte) {
@@ -232,15 +227,13 @@ void Robust_EEPROM::write (uint16_t write_byte, uint8_t data) {
         tryouts++;
     } while (read(write_byte) != data);
 
-    updatelastdatabyte(write_byte);
-
 }
 
 void Robust_EEPROM::update (uint16_t update_byte, uint8_t data) {
 
     update_byte = mathFunctions::min_uint(update_byte, totalDataBytes - 1);
     int tryouts = 0;
-    do {
+    while (read(update_byte) != data) {
         if (dummy_eeprom == nullptr) {
             EEPROM.update(absolutebyte(update_byte), data);
         } else {
@@ -252,24 +245,19 @@ void Robust_EEPROM::update (uint16_t update_byte, uint8_t data) {
             tryouts = 0;
         }
         tryouts++;
-    } while (read(update_byte) != data);
-
-    updatelastdatabyte(update_byte);
+    }
 
 }
 
 void Robust_EEPROM::offsetright (uint16_t actual_byte) {
 
     int tryouts;
-    offsetDataByte++;
-    for (uint16_t data_i = lastDataByte + offsetDataByte; data_i > actual_byte + 1; data_i--) {
+    for (uint16_t data_i = totalDataBytes - 1; data_i > actual_byte + 1; data_i--) {  // the actual_byte is destined to be overwritten (no need to offset)
         tryouts = 0; // needs to be reseted for each for
-        do {
+        while (read(data_i) != read(data_i - 1)) {
 
             // if (true) {
             
-            //     Serial.print(offsetDataByte);
-            //     Serial.print(" // ");
             //     Serial.print(actual_byte);
             //     Serial.print(":");
             //     Serial.print(absolutebyte(actual_byte));
@@ -300,9 +288,8 @@ void Robust_EEPROM::offsetright (uint16_t actual_byte) {
             }
             tryouts++;
             // delay(1000);
-        } while (read(data_i) != read(data_i - 1));
+        }
     }
-    offsetDataByte--;
 }
 
 void Robust_EEPROM::disablebyte (uint16_t relative_byte) {
@@ -341,32 +328,6 @@ void Robust_EEPROM::disablebyte (uint16_t relative_byte) {
 
 }
 
-void Robust_EEPROM::updatelastdatabyte (uint16_t lastDataByte) {
-    if (lastDataByte > this->lastDataByte) {
-        this->lastDataByte = lastDataByte;
-        if (dummy_eeprom == nullptr) {
-            EEPROM.update(firstByte + totalDataBytes, (uint8_t)(this->lastDataByte & 0b11111111));
-            EEPROM.update(firstByte + totalDataBytes + 1, (uint8_t)(this->lastDataByte >> 8 & 0b11111111));
-        } else {
-            dummy_eeprom->update(firstByte + totalDataBytes, (uint8_t)(this->lastDataByte & 0b11111111));
-            dummy_eeprom->update(firstByte + totalDataBytes + 1, (uint8_t)(this->lastDataByte >> 8 & 0b11111111));
-        }
-    }
-}
-
-uint16_t Robust_EEPROM::readlastdatabyte () {
-    if (dummy_eeprom == nullptr) {
-        lastDataByte = (uint16_t)EEPROM.read(firstByte + totalDataBytes);
-        lastDataByte |= (uint16_t)EEPROM.read(firstByte + totalDataBytes + 1) << 8;
-    } else {
-        lastDataByte = (uint16_t)dummy_eeprom->read(firstByte + totalDataBytes);
-        lastDataByte |= (uint16_t)dummy_eeprom->read(firstByte + totalDataBytes + 1) << 8;
-    }
-    lastDataByte = mathFunctions::min_uint(lastDataByte, totalDataBytes - 1);
-    updatelastdatabyte(lastDataByte);
-    return lastDataByte;
-}
-
 void Robust_EEPROM::fullreset () {
     if (dummy_eeprom == nullptr) {
         for (uint16_t absolute_i = firstByte; absolute_i < firstByte + totalBytes; absolute_i++) {
@@ -377,5 +338,4 @@ void Robust_EEPROM::fullreset () {
             dummy_eeprom->update(absolute_i, 0);
         }
     }
-    lastDataByte = 0;
 }

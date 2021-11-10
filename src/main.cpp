@@ -48,8 +48,6 @@ void loop() {
                 Serial.print(":");
             }
             Serial.println("");
-            Serial.print(robust_eeprom->lastdatabyte());
-            Serial.print(" of ");
             Serial.print(robust_eeprom->length());
             Serial.print(" of ");
             Serial.print(robust_eeprom->datalength());
@@ -59,13 +57,11 @@ void loop() {
             Serial.print(data_health);
             Serial.println("%");
             Serial.println("");
-            if (data_health < 95) {  // Last Percentage %
+            if (data_health < 70) {  // Last Percentage %
                 stop = true;
                 Serial.println("--------------------------");
                 Serial.println(robust_eeprom->length());
                 Serial.println(robust_eeprom->datalength());
-                Serial.println(robust_eeprom->lastdatabyte());
-                Serial.println(robust_eeprom->absolutebyte(robust_eeprom->lastdatabyte()));
             }
             
             length = robust_eeprom->length();
