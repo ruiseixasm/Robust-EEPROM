@@ -48,6 +48,8 @@ void loop() {
                 Serial.print(":");
             }
             Serial.println("");
+            Serial.print(robust_eeprom->lastdatabyte());
+            Serial.print(" of ");
             Serial.print(robust_eeprom->length());
             Serial.print(" of ");
             Serial.print(robust_eeprom->datalength());

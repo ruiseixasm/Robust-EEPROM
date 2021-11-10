@@ -369,17 +369,13 @@ uint16_t Robust_EEPROM::readlastdatabyte () {
 
 void Robust_EEPROM::fullreset () {
     if (dummy_eeprom == nullptr) {
-        for (uint16_t i = firstByte; i < firstByte + totalBytes; i++) {
-            if (i < firstByte + totalDataBytes || i > firstByte + totalDataBytes + 1) {
-                EEPROM.update(i, 0);
-            }
+        for (uint16_t absolute_i = firstByte; absolute_i < firstByte + totalBytes; absolute_i++) {
+            EEPROM.update(absolute_i, 0);
         }
     } else {
-        for (uint16_t i = firstByte; i < firstByte + totalBytes; i++) {
-            if (i < firstByte + totalDataBytes || i > firstByte + totalDataBytes + 1) {
-                dummy_eeprom->update(i, 0);
-            }
+        for (uint16_t absolute_i = firstByte; absolute_i < firstByte + totalBytes; absolute_i++) {
+            dummy_eeprom->update(absolute_i, 0);
         }
     }
-    updatelastdatabyte(0);
+    lastDataByte = 0;
 }
