@@ -10,7 +10,8 @@ To use the library in your own sketch, select it from *Sketch > Import Library*.
 
 ## What is Robust_EEPROM
 The Robust_EEPROM library alows the use unalocated bytes on an EEPROM memory as redundant memory for failed bytes
-of the alocated one. It does this by using 8/9ths as data bytes and 1/9th as control bytes of the total memory allocated, these control bytes are bit markers of failed data bytes.
+of the alocated one. It does this by using 8/9ths as data bytes and 1/9th as control bytes of the total memory allocated,
+these control bytes are bit markers of failed data bytes.
 This way it works as a virtual memory that is then translated to the physical one accordingly to the amount of
 working bytes.
 
@@ -39,15 +40,37 @@ The function returns an `unsigned char` containing the value read.
 #### **`Robust_EEPROM.write( address, value )`**
 
 The `write()` method allows you to write a single byte of data to the EEPROM.
-Two parameters are needed. The first is an `int` containing the virtual address that is to be converted to the physical one to be written, and the second is a the data to be written (`unsigned char`).
+Two parameters are needed. The first is an `int` containing the virtual address that is to be converted
+to the physical one to be written, and the second is a the data to be written (`unsigned char`).
 
 This function does not return any value.
 
 #### **`Robust_EEPROM.update( address, value )`**
 
-This function is similar to `Robust_EEPROM.write()` however this method will only write data if the cell contents pointed to by the `virtual address` is different to `value`. This method can help prevent unnecessary wear on the EEPROM cells.
+This function is similar to `Robust_EEPROM.write()` however this method will only write data if
+the cell contents pointed to by the `virtual address` is different to `value`. This method can
+help prevent unnecessary wear on the EEPROM cells.
 
 This function does not return any value.
 
 #### **`Robust_EEPROM.fullreset()`**
-This functions zeroes the entire physical memory associated to.
+This functions zeroes the entire physical memory associated to the virtual one.
+
+#### **`Robust_EEPROM.controllength()`**
+This functions returns an `int` with the amount of control bytes.
+
+#### **`Robust_EEPROM.datalength()`**
+This functions returns an `int` with the amount of data bytes used as virtual data memory.
+
+#### **`Robust_EEPROM.physicallength()`**
+This functions returns an `int` with the amount of physical bytes used by the entire virtual memory.
+
+#### **`Robust_EEPROM.length()`**
+This functions returns an `int` with the amount of bytes still availlable for the data virtual memory.
+As physical memory bytes start to fail this memory decreses in size.
+
+#### **`Robust_EEPROM.physicalbyte( address )`**
+
+This method allows you to get the respective physical address from a virtual one. With an ever inreasing
+failed bytes these addresses become more different from each other.
+
