@@ -23,7 +23,5 @@ void setup(){
 
 void loop(){
 
-}
-
-```
+}```
 ### **Library functions**
