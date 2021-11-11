@@ -70,7 +70,7 @@ void loop() {
             }
             Serial.println("");
             for (int i = 0; i < 10; i++) {
-                Serial.print(robust_eeprom->absolutebyte(i));
+                Serial.print(robust_eeprom->physicalbyte(i));
                 Serial.print(":");
             }
             Serial.println("");
@@ -83,7 +83,7 @@ void loop() {
             Serial.print(" of ");
             Serial.print(robust_eeprom->datalength());
             Serial.print(" of ");
-            Serial.print(robust_eeprom->absolutelength());
+            Serial.print(robust_eeprom->physicallength());
             Serial.print(" = ");
             Serial.print(data_health);
             Serial.println("%");
