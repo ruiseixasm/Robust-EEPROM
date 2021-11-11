@@ -63,8 +63,10 @@ void loop() {
             Serial.print(data_health);
             Serial.println("%");
             Serial.println("");
-            if (data_health < 20)  // Last Percentage %
+            if (data_health < 20) {  // Last Percentage %
                 stop = true;
+                Serial.println("Finish!");
+            }
             
             length = robust_eeprom->length();
         }
