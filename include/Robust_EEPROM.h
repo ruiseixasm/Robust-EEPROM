@@ -20,6 +20,7 @@ class Dummy_EEPROM {
         uint16_t size;
     public:
         Dummy_EEPROM(uint16_t);
+        ~Dummy_EEPROM();
         uint16_t length();
         uint8_t read(uint16_t);
         void write(uint16_t, uint8_t);

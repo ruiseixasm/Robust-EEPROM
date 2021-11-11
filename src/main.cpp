@@ -1,5 +1,9 @@
 #include "Robust_EEPROM.h"
 
+int buzzer = 14;
+int led_blue = 15;
+int led_red = 16;
+
 int length = 0;
 int data_health = 0;
 bool stop = false;
@@ -9,6 +13,14 @@ Robust_EEPROM *robust_eeprom;
 
 void setup() {
     Serial.begin(9600);
+    
+    pinMode(buzzer, OUTPUT);
+    digitalWrite(buzzer, LOW);
+    pinMode(led_blue, OUTPUT);
+    digitalWrite(led_blue, HIGH);
+    pinMode(led_red, OUTPUT);
+    digitalWrite(led_red, LOW);
+
     Serial.println("Preparing!");
     dummy_eeprom = new Dummy_EEPROM(1024/4);
     // robust_eeprom = new Robust_EEPROM(dummy_eeprom);
@@ -69,6 +81,7 @@ void loop() {
                 Serial.println("--------------------------");
                 Serial.println(robust_eeprom->length());
                 Serial.println(robust_eeprom->datalength());
+                digitalWrite(led_blue, LOW);
             }
             
             length = robust_eeprom->length();
