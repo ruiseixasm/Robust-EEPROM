@@ -248,7 +248,7 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Preparing!");
 
-    dummy_eeprom = new Dummy_EEPROM(1024/4); // Avoid ussing all 1024 board RAM memory
+    dummy_eeprom = new Dummy_EEPROM(1024/4); // Avoid using all 1024 board RAM memory
     robust_eeprom = new Robust_EEPROM(dummy_eeprom); // FULL DUMMY ALLOCATION
     robust_eeprom->fullreset();
 
@@ -330,7 +330,7 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Preparing!");
 
-    dummy_eeprom = new Dummy_EEPROM(1024/4); // Avoid ussing all 1024 board RAM memory
+    dummy_eeprom = new Dummy_EEPROM(1024/4); // Avoid using all 1024 board RAM memory
     robust_eeprom = new Robust_EEPROM(50, 100, dummy_eeprom); // PARTIAL DUMMY ALLOCATION
     robust_eeprom->fullreset();
 
