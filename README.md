@@ -73,3 +73,76 @@ As physical memory bytes start to fail this memory decreses in size.
 This method allows you to get the respective `physical address` from a virtual one. With an ever inreasing
 failed bytes these addresses become more different from each other.
 
+### **Examples**
+#### **Full Memory Allocation**
+```Arduino
+#include "Robust_EEPROM.h"
+
+Dummy_EEPROM *dummy_eeprom;
+Robust_EEPROM *robust_eeprom;
+
+void setup() {
+    Serial.begin(9600);
+    Serial.println("Preparing!");
+
+    dummy_eeprom = new Dummy_EEPROM(1024/4);
+    robust_eeprom = new Robust_EEPROM();
+    robust_eeprom->fullreset();
+    Serial.println("Starting!");
+    Serial.println("");
+    for (int i = 0; i < 10; i++) {
+        robust_eeprom->update(i, rand() % 256);
+    }
+}
+
+void loop() {
+
+    if (!stop) {
+
+        for (int i = 0; i < 5; i++) {
+            robust_eeprom->update(i, rand() % 256);
+        }
+    
+        if (length != robust_eeprom->length()) {
+
+            data_health = (int)floor(100*robust_eeprom->length()/robust_eeprom->datalength());
+
+            Serial.println("Virtual Adresses");
+            for (int i = 0; i < 10; i++) {
+                Serial.print(i);
+                Serial.print(":");
+            }
+            Serial.println("Physical Adresses");
+            for (int i = 0; i < 10; i++) {
+                Serial.print(robust_eeprom->physicalbyte(i));
+                Serial.print(":");
+            }
+            Serial.println("Data");
+            for (int i = 0; i < 10; i++) {
+                Serial.print(robust_eeprom->read(i));
+                Serial.print(":");
+            }
+            Serial.println("");
+            Serial.print(robust_eeprom->length());
+            Serial.print(" of ");
+            Serial.print(robust_eeprom->datalength());
+            Serial.print(" of ");
+            Serial.print(robust_eeprom->physicallength());
+            Serial.print(" = ");
+            Serial.print(data_health);
+            Serial.println("%");
+            Serial.println("");
+            if (data_health < 20) {  // Last Percentage %
+                stop = true;
+                Serial.println("--------------------------");
+                Serial.println(robust_eeprom->length());
+                Serial.println(robust_eeprom->datalength());
+            }
+            
+            length = robust_eeprom->length();
+        }
+        
+    }
+
+}
+```
