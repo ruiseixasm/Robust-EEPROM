@@ -162,9 +162,7 @@ uint16_t Robust_EEPROM::length () {
             }
         }
     }
-
     return totalDataBytes - failed_bytes;
-
 }
 
 uint16_t Robust_EEPROM::physicallength () {
@@ -214,7 +212,6 @@ uint16_t Robust_EEPROM::physicalbyte (uint16_t virtual_byte) {
         }
     }
     return physical_byte + firstByte;
-
 }
 
 uint8_t Robust_EEPROM::read (uint16_t virtual_byte) {
@@ -250,21 +247,8 @@ void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
 
 void Robust_EEPROM::update (uint16_t virtual_byte, uint8_t data) {
 
-    virtual_byte = mathFunctions::min_uint(virtual_byte, totalDataBytes - 1);
-    int tryouts = 0;
-    while (read(virtual_byte) != data) {
-        if (dummy_eeprom == nullptr) {
-            EEPROM.write(physicalbyte(virtual_byte), data);
-        } else {
-            dummy_eeprom->write(physicalbyte(virtual_byte), data);
-        }
-        if (tryouts == 5) {
-            offsetright(virtual_byte);
-            disablebyte(virtual_byte);
-            tryouts = 0;
-        }
-        tryouts++;
-    }
+    if (read(virtual_byte) != data)
+        write(virtual_byte, data);
 
 }
 
