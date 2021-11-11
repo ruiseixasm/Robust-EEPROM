@@ -33,6 +33,13 @@ void loop() {
         if (length != robust_eeprom->length()) {
 
             data_health = (int)floor(100*robust_eeprom->length()/robust_eeprom->datalength());
+
+            if (data_health == 55) {  // Last Percentage %
+                robust_eeprom->fullreset();
+                for (int i = 0; i < 10; i++) {
+                    robust_eeprom->update(i, rand() % 256);
+                }
+            }
             for (int i = 0; i < 10; i++) {
                 Serial.print(i);
                 Serial.print(":");
@@ -57,7 +64,7 @@ void loop() {
             Serial.print(data_health);
             Serial.println("%");
             Serial.println("");
-            if (data_health < 70) {  // Last Percentage %
+            if (data_health < 10) {  // Last Percentage %
                 stop = true;
                 Serial.println("--------------------------");
                 Serial.println(robust_eeprom->length());
