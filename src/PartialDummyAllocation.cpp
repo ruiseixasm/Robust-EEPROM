@@ -33,14 +33,14 @@ void loop() {
 
             data_health = (int)(100*(double)robust_eeprom->length()/robust_eeprom->datalength());
 
-            Serial.println("Virtual Adresses");
+            Serial.println("Virtual Addresses");
             Serial.print("    ");
             for (int i = 0; i < 10; i++) {
                 Serial.print(i);
                 Serial.print(":");
             }
             Serial.println("");
-            Serial.println("Physical Adresses");
+            Serial.println("Physical Addresses");
             Serial.print("    ");
             for (int i = 0; i < 10; i++) {
                 Serial.print(robust_eeprom->physicalbyte(i));
