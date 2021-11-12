@@ -235,7 +235,7 @@ void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
         } else {
             dummy_eeprom->write(physicalbyte(virtual_byte), data);
         }
-        if (tryouts == 5) {
+        if (tryouts > 5 && read(virtual_byte) != data) {
             offsetright(virtual_byte);
             disablebyte(virtual_byte);
             tryouts = 0;
