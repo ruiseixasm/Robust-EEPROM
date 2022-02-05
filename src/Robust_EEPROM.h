@@ -16,15 +16,6 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
-class mathFunctions {
-    public:
-        static uint16_t max_uint(uint16_t, uint16_t);
-        static uint16_t min_uint(uint16_t, uint16_t);
-        static uint16_t ceil_log2(uint16_t);
-        static uint16_t seed_generator(uint32_t=1000, uint32_t=50);
-};
-
-
 class Dummy_EEPROM {
     private:
         uint8_t *dummy_bytes;
@@ -37,35 +28,31 @@ class Dummy_EEPROM {
         uint8_t read(uint16_t);
         void write(uint16_t, uint8_t);
         void update(uint16_t, uint8_t);
+        static uint16_t seed_generator(uint32_t=1000, uint32_t=50);
 };
-
 
 class Robust_EEPROM {
     private:
-        Dummy_EEPROM *dummy_eeprom;
-        uint16_t totalBytes;
-        uint16_t totalControlBytes;
-        uint16_t totalDataBytes;
+        Dummy_EEPROM *dummy_eeprom = nullptr;
         uint16_t firstByte;
+        uint16_t totalBytes;
         void initiateEEPROM();
         void offsetright(uint16_t);
         void disablebyte(uint16_t);
     public:
         Robust_EEPROM(uint16_t, uint16_t, Dummy_EEPROM*);
-        Robust_EEPROM(uint16_t, uint16_t);
         Robust_EEPROM(Dummy_EEPROM*);
+        Robust_EEPROM(uint16_t, uint16_t);
         Robust_EEPROM();
-        uint16_t length();
-        uint16_t physicallength();
-        uint16_t datalength();
-        uint16_t controllength();
-        uint16_t physicalbyte(uint16_t);
+        uint16_t netLength();
+        uint16_t physicalLength();
+        uint16_t controlLength();
+        uint16_t dataLength();
+        uint16_t physicalByte(uint16_t);
         uint8_t read(uint16_t);
         void write(uint16_t, uint8_t);
         void update(uint16_t, uint8_t);
         void fullreset();
-
 };
-
 
 #endif // Robust_EEPROM_H_INCLUDED

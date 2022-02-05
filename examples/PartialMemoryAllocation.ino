@@ -33,9 +33,9 @@ void loop() {
         for (int i = 0; i < test_array_length / 2; i++)
             robust_eeprom->update(i, rand() % 256);
     
-        if (length != robust_eeprom->length()) {
+        if (length != robust_eeprom->netLength()) {
 
-            data_health = (int)(100*(double)robust_eeprom->length()/robust_eeprom->datalength());
+            data_health = (int)(100*(double)robust_eeprom->netLength()/robust_eeprom->dataLength());
 
             Serial.println("Virtual Addresses");
             Serial.print("    ");
@@ -47,7 +47,7 @@ void loop() {
             Serial.println("Physical Addresses");
             Serial.print("    ");
             for (int i = 0; i < test_array_length; i++) {
-                Serial.print(robust_eeprom->physicalbyte(i));
+                Serial.print(robust_eeprom->physicalByte(i));
                 Serial.print(":");
             }
             Serial.println("");
@@ -60,11 +60,11 @@ void loop() {
             Serial.println("");
             Serial.println("length of datalength of physicallenght = data memory health");
             Serial.print("    ");
-            Serial.print(robust_eeprom->length());
+            Serial.print(robust_eeprom->netLength());
             Serial.print(" of ");
-            Serial.print(robust_eeprom->datalength());
+            Serial.print(robust_eeprom->dataLength());
             Serial.print(" of ");
-            Serial.print(robust_eeprom->physicallength());
+            Serial.print(robust_eeprom->physicalLength());
             Serial.print(" = ");
             Serial.print(data_health);
             Serial.println("%");
@@ -73,7 +73,7 @@ void loop() {
                 test = result;
                 Serial.println("Finish!");
             }
-            length = robust_eeprom->length();
+            length = robust_eeprom->netLength();
         }
         
     } else if (test == result) {
