@@ -107,7 +107,7 @@ void Robust_EEPROM::setNetBytes () {
             control_data = EEPROM.read(firstByte + dataLength() + control_byte);
         else
             control_data = dummy_eeprom->read(firstByte + dataLength() + control_byte);
-        for (int control_bit = 0; control_bit < min(dataLength() - 8*control_byte, 8); control_bit++)
+        for (uint8_t control_bit = 0; control_bit < min(dataLength() - 8*control_byte, 8); control_bit++)
             disabled_bytes += control_data >> control_bit & 0b00000001;
     }
     netBytes = dataLength() - disabled_bytes;
@@ -141,7 +141,7 @@ uint16_t Robust_EEPROM::physicalByte (uint16_t virtual_byte) {
             control_data = EEPROM.read(firstByte + dataLength() + control_byte);
         else
             control_data = dummy_eeprom->read(firstByte + dataLength() + control_byte);
-        for (int control_bit = 0; control_bit < min(dataLength() - 8*control_byte, 8); control_bit++) {
+        for (uint8_t control_bit = 0; control_bit < min(dataLength() - 8*control_byte, 8); control_bit++) {
             virtual_byte += control_data >> control_bit & 0b00000001; // jumps all disabled bytes
             if (virtual_byte == 0 || physical_byte == dataLength() - 1) {
                 return firstByte + physical_byte;
