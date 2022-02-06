@@ -155,32 +155,33 @@ uint16_t Robust_EEPROM::physicalByte (uint16_t virtual_byte) {
 }
 
 uint8_t Robust_EEPROM::read (uint16_t virtual_byte) {
-    if (dummy_eeprom == nullptr)
-        return EEPROM.read(physicalByte(virtual_byte));
-    else
-        return dummy_eeprom->read(physicalByte(virtual_byte));
+    if (virtual_byte < netBytes) {
+        if (dummy_eeprom == nullptr)
+            return EEPROM.read(physicalByte(virtual_byte));
+        else
+            return dummy_eeprom->read(physicalByte(virtual_byte));
+    } else
+        return 0; // For out of scope read data requests
 }
 
 void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
     rightestByte = max(virtual_byte, rightestByte);
     uint8_t tryouts = 0;
     do {
+        tryouts++;
+        if (tryouts > 3) {
+            if (allocatedLength() < netLength()) {
+                offsetRight(virtual_byte);
+                rightestByte--; // Needs to reverse the +1 increment for each Offset operation
+                disableByte(virtual_byte);
+                tryouts = 0;
+            } else // Breaks loop when available memory is depleted
+                break;
+        }
         if (dummy_eeprom == nullptr)
             EEPROM.write(physicalByte(virtual_byte), data);
         else
             dummy_eeprom->write(physicalByte(virtual_byte), data);
-        if (tryouts > 5 && read(virtual_byte) != data) {
-            if (allocatedLength() < netLength()) {
-                offsetRight(virtual_byte);
-                rightestByte--; // Needs to remove the +1 for each Offset operation
-                disableByte(virtual_byte);
-                tryouts = 0;
-            } else { // Decrements netBytes and Breaks loop when available memory depleted
-                netBytes = rightestByte;
-                break;
-            }
-        }
-        tryouts++;
     } while (read(virtual_byte) != data);
 }
 
@@ -204,7 +205,7 @@ void Robust_EEPROM::offsetRight (uint16_t failed_virtual_byte) {
     // for the situation resulted from an upper offset call (recursive) then
     // the new failed_virtual_byte offset was already performed by the previous iteration (kept).
     for (uint16_t data_byte = rightestByte; data_byte > failed_virtual_byte; data_byte--) // virtual for loop
-        update(data_byte + 1, read(data_byte)); // Increments the rightestByte, this will be decremented in the write function
+        update(data_byte + 1, read(data_byte)); // Increments +1 the rightestByte, this will be decremented in the write function
 }
 
 void Robust_EEPROM::disableByte (uint16_t failed_virtual_byte) {

@@ -72,7 +72,7 @@ void loop() {
             Serial.println("%");
             Serial.println("");
             // Use '||' to stop at 20% or '&&' to do the full available memory test
-            if (data_health < 20 && robust_eeprom->allocatedLength() > robust_eeprom->netLength()) {
+            if (data_health < 20 && robust_eeprom->allocatedLength() == robust_eeprom->netLength()) {
                 test = result;
                 Serial.println("Finish!");
             }
