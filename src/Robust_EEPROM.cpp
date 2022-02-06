@@ -163,7 +163,7 @@ uint8_t Robust_EEPROM::read (uint16_t virtual_byte) {
 
 void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
     rightestByte = max(virtual_byte, rightestByte);
-    int tryouts = 0;
+    uint8_t tryouts = 0;
     do {
         if (dummy_eeprom == nullptr)
             EEPROM.write(physicalByte(virtual_byte), data);
