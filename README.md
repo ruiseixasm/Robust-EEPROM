@@ -62,7 +62,7 @@ This functions returns an `unsigned int` with the amount of data bytes used as v
 #### **`Robust_EEPROM.physicalLength()`**
 This functions returns an `unsigned int` with the amount of physical bytes used by the entire virtual memory.
 
-#### **`Robust_EEPROM.getNetLength()`**
+#### **`Robust_EEPROM.netLength()`**
 This functions returns an `unsigned int` with the amount of bytes still availlable for the data virtual memory.
 As physical memory bytes start to fail this memory decreses in size down to zero.
 
