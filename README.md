@@ -1,4 +1,4 @@
-## **Robust-EEPROM Library V1.1** for Arduino
+## **Robust-EEPROM Library V1.2** for Arduino
 **Written by:** _Rui Seixas Monteiro_.
 
 ## Installation
@@ -62,9 +62,13 @@ This functions returns an `unsigned int` with the amount of data bytes used as v
 #### **`Robust_EEPROM.physicalLength()`**
 This functions returns an `unsigned int` with the amount of physical bytes used by the entire virtual memory.
 
-#### **`Robust_EEPROM.netLength()`**
+#### **`Robust_EEPROM.getNetLength()`**
 This functions returns an `unsigned int` with the amount of bytes still availlable for the data virtual memory.
-As physical memory bytes start to fail this memory decreses in size.
+As physical memory bytes start to fail this memory decreses in size down to zero.
+
+#### **`Robust_EEPROM.allocatedLength()`**
+This functions returns an `unsigned int` with the amount of bytes being used by virtual memory.
+As new data is added this value increases up to the total extent of the written data on virtual memory.
 
 #### **`Robust_EEPROM.physicalByte( virtual_address )`**
 
@@ -136,16 +140,19 @@ void loop() {
             Serial.println("");
             Serial.println("length of datalength of physicallenght = data memory health");
             Serial.print("    ");
+            Serial.print(robust_eeprom->allocatedLength());
+            Serial.print(" of ");
             Serial.print(robust_eeprom->netLength());
             Serial.print(" of ");
             Serial.print(robust_eeprom->dataLength());
             Serial.print(" of ");
-            Serial.print(robust_eeprom->physicalLength());
+            Serial.print(robust_eeprom->totalLength());
             Serial.print(" = ");
             Serial.print(data_health);
             Serial.println("%");
             Serial.println("");
-            if (data_health < 20) {  // Last Percentage %
+            // Use '||' to stop at 20% or '&&' to do the full available memory test
+            if (data_health < 20 && robust_eeprom->allocatedLength() > robust_eeprom->netLength()) {
                 test = result;
                 Serial.println("Finish!");
             }

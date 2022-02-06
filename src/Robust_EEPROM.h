@@ -34,18 +34,21 @@ class Dummy_EEPROM {
 class Robust_EEPROM {
     private:
         Dummy_EEPROM *dummy_eeprom = nullptr;
-        uint16_t firstByte;
+        uint16_t firstByte = 0;
         uint16_t totalBytes;
-        void initiateEEPROM();
-        void offsetright(uint16_t);
-        void disablebyte(uint16_t);
+        uint16_t netBytes;
+        uint16_t rightestByte = 0; // Stops new memory allocation when all working Data Bytes become depleted
+        void setNetBytes();
+        void offsetRight(uint16_t);
+        void disableByte(uint16_t);
     public:
         Robust_EEPROM(uint16_t, uint16_t, Dummy_EEPROM*);
         Robust_EEPROM(Dummy_EEPROM*);
         Robust_EEPROM(uint16_t, uint16_t);
         Robust_EEPROM();
         uint16_t netLength();
-        uint16_t physicalLength();
+        uint16_t allocatedLength();
+        uint16_t totalLength();
         uint16_t controlLength();
         uint16_t dataLength();
         uint16_t physicalByte(uint16_t);

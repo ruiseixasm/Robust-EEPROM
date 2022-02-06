@@ -60,16 +60,19 @@ void loop() {
             Serial.println("");
             Serial.println("length of datalength of physicallenght = data memory health");
             Serial.print("    ");
+            Serial.print(robust_eeprom->allocatedLength());
+            Serial.print(" of ");
             Serial.print(robust_eeprom->netLength());
             Serial.print(" of ");
             Serial.print(robust_eeprom->dataLength());
             Serial.print(" of ");
-            Serial.print(robust_eeprom->physicalLength());
+            Serial.print(robust_eeprom->totalLength());
             Serial.print(" = ");
             Serial.print(data_health);
             Serial.println("%");
             Serial.println("");
-            if (data_health < 20) {  // Last Percentage %
+            // Use '||' to stop at 20% or '&&' to do the full available memory test
+            if (data_health < 20 && robust_eeprom->allocatedLength() > robust_eeprom->netLength()) {
                 test = result;
                 Serial.println("Finish!");
             }
