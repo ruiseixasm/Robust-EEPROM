@@ -76,7 +76,7 @@ This method allows you to get the respective `physical address` from a virtual o
 failed bytes these addresses become more different from each other.
 
 ### **Examples**
-#### **Full Memory Allocation**
+#### **Partial Dummy Memory Allocation (Testing Purposes)**
 ```Arduino
 #include <Robust_EEPROM.h>
 
@@ -93,14 +93,16 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Preparing!");
 
-    // EEPROM ALLOCATION (USE SCENARIO) (COMMENT NOT APPLICABLE)
-    robust_eeprom = new Robust_EEPROM(); // FULL ALLOCATION
+    // COMMENT AND UNCOMMENT ACCORDINGLY TO USAGE SCENARIO
+    //********************************************************************************
+    // EEPROM ALLOCATION (NORMAL SCENARIO)
+    // robust_eeprom = new Robust_EEPROM(); // FULL ALLOCATION
     // robust_eeprom = new Robust_EEPROM(50, 100); // PARTIAL ALLOCATION
-
-    // DUMMY ALLOCATION (TEST SCENARIO) (COMMENT NOT APPLICABLE)
-    // dummy_eeprom = new Dummy_EEPROM(1024/4); // Avoid using all 1024 board RAM memory
+    // DUMMY ALLOCATION (TEST SCENARIO)
+    dummy_eeprom = new Dummy_EEPROM(1024/4); // Avoid using all 1024 board RAM memory
     // robust_eeprom = new Robust_EEPROM(dummy_eeprom); // FULL ALLOCATION
-    // robust_eeprom = new Robust_EEPROM(50, 100, dummy_eeprom); // PARTIAL ALLOCATION
+    robust_eeprom = new Robust_EEPROM(50, 100, dummy_eeprom); // PARTIAL ALLOCATION
+    //********************************************************************************
     
     robust_eeprom->fullreset();
 
