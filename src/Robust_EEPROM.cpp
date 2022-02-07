@@ -38,7 +38,7 @@ Dummy_EEPROM::Dummy_EEPROM (uint16_t size) {
     srand(seed_generator());
     for (uint16_t b = 0; b < size; b++) {
         dummy_bytes[b] = (uint8_t)(rand() % 256);
-        ttl_bytes[b] = (uint16_t)(1000 - rand() % 500);    // maximum for uint16_t = 65535
+        ttl_bytes[b] = (uint16_t)(1000 - rand() % 500); // maximum for uint16_t = 65535
     }
 }
 
@@ -72,7 +72,7 @@ void Dummy_EEPROM::update (uint16_t physical_byte, uint8_t data) {
 #pragma endregion Dummy_EEPROM
 
 
-// Main EEPROM Functions (typical usage) --------------------------------------------------------
+
 #pragma region Robust_EEPROM
 
 Robust_EEPROM::Robust_EEPROM (uint16_t firstByte, uint16_t lengthBytes, Dummy_EEPROM* const dummy_eeprom) {
@@ -102,7 +102,7 @@ Robust_EEPROM::Robust_EEPROM () {
 void Robust_EEPROM::setNetBytes () {
     uint16_t disabled_bytes = 0;
     uint8_t control_data = 0;
-    for (uint16_t control_byte = 0; control_byte < controlLength(); control_byte++) { // physical for loop
+    for (uint16_t control_byte = 0; control_byte < controlLength(); control_byte++) { // loop of physical bytes
         if (dummy_eeprom == nullptr)
             control_data = EEPROM.read(firstByte + dataLength() + control_byte);
         else
@@ -136,7 +136,7 @@ uint16_t Robust_EEPROM::dataLength () {
 uint16_t Robust_EEPROM::physicalByte (uint16_t virtual_byte) {
     uint16_t physical_byte = 0;
     uint8_t control_data;
-    for (uint16_t control_byte = 0; control_byte < controlLength(); control_byte++) { // physical for loop
+    for (uint16_t control_byte = 0; control_byte < controlLength(); control_byte++) { // loop of physical bytes
         if (dummy_eeprom == nullptr)
             control_data = EEPROM.read(firstByte + dataLength() + control_byte);
         else
@@ -165,7 +165,7 @@ uint8_t Robust_EEPROM::read (uint16_t virtual_byte) {
 }
 
 void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
-    rightestByte = max(virtual_byte, rightestByte);
+    rightestByte = max(virtual_byte, rightestByte); // New data commited to be allocated (preserved)
     uint8_t tryouts = 0;
     do {
         tryouts++;
@@ -173,8 +173,8 @@ void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
             if (allocatedLength() < netLength()) {
                 offsetRight(virtual_byte);
                 disableByte(virtual_byte);
-                tryouts = 0;
-            } else // Breaks loop when available memory is depleted
+                tryouts = 1;
+            } else // Breaks loop when available memory is depleted (avoids infinite loop)
                 break;
         }
         if (dummy_eeprom == nullptr)
@@ -185,7 +185,7 @@ void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
 }
 
 void Robust_EEPROM::update (uint16_t virtual_byte, uint8_t data) {
-    rightestByte = max(virtual_byte, rightestByte); // New data commited to be allocated
+    rightestByte = max(virtual_byte, rightestByte); // New data commited to be allocated (preserved)
     if (read(virtual_byte) != data)
         write(virtual_byte, data);
 }
@@ -204,7 +204,7 @@ void Robust_EEPROM::offsetRight (uint16_t failed_virtual_byte) {
     // The failed_virtual_byte contains outdated data so no offset needed for it,
     // for the situation resulted from an upper offset call (recursive) then
     // the new failed_virtual_byte offset was already performed by the previous iteration (kept).
-    for (uint16_t data_byte = rightestByte; data_byte > failed_virtual_byte; data_byte--) // virtual for loop
+    for (uint16_t data_byte = rightestByte; data_byte > failed_virtual_byte; data_byte--) // loop of virtual bytes
         update(data_byte + 1, read(data_byte)); // Increments +1 the rightestByte (done by the update function)
     rightestByte--; // Needs to reverse the +1 increment of the previous Offset operation
 }
@@ -221,7 +221,7 @@ void Robust_EEPROM::disableByte (uint16_t failed_virtual_byte) {
         control_data = dummy_eeprom->read(firstByte + dataLength() + (uint16_t)(data_byte/8)) | 0b00000001 << data_byte % 8;
         dummy_eeprom->update(firstByte + dataLength() + (uint16_t)(data_byte/8), control_data);
     }
-    netBytes--; // Decrements the total amount of still enabled Bytes
+    netBytes--; // Decrements the total amount of available Bytes
 }
 
 #pragma endregion Robust_EEPROM

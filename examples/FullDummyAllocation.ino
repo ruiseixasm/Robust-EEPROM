@@ -13,8 +13,15 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Preparing!");
 
-    dummy_eeprom = new Dummy_EEPROM(1024/4); // Avoid using all 1024 board RAM memory
-    robust_eeprom = new Robust_EEPROM(dummy_eeprom); // FULL DUMMY ALLOCATION
+    // EEPROM ALLOCATION (USE SCENARIO) (COMMENT NOT APPLICABLE)
+    robust_eeprom = new Robust_EEPROM(); // FULL ALLOCATION
+    // robust_eeprom = new Robust_EEPROM(50, 100); // PARTIAL ALLOCATION
+
+    // DUMMY ALLOCATION (TEST SCENARIO) (COMMENT NOT APPLICABLE)
+    // dummy_eeprom = new Dummy_EEPROM(1024/4); // Avoid using all 1024 board RAM memory
+    // robust_eeprom = new Robust_EEPROM(dummy_eeprom); // FULL ALLOCATION
+    // robust_eeprom = new Robust_EEPROM(50, 100, dummy_eeprom); // PARTIAL ALLOCATION
+    
     robust_eeprom->fullreset();
 
     Serial.println("Starting!");
@@ -60,7 +67,7 @@ void loop() {
                 Serial.print(":");
             }
             Serial.println("");
-            Serial.println("length of datalength of physicallenght = data memory health");
+            Serial.println("(Allocation) of (Net Length) of (Data Length) of (Total Lenght) = (Data Memory Health)");
             Serial.print("    ");
             Serial.print(robust_eeprom->allocatedLength());
             Serial.print(" of ");

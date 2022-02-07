@@ -84,6 +84,7 @@ int test_array_length = 10;
 int *starting_data_array;  
 int length = 0;
 int data_health = 0;
+Dummy_EEPROM *dummy_eeprom;
 Robust_EEPROM *robust_eeprom;
 enum Test {testing, result, stop};
 Test test = testing;
@@ -92,7 +93,15 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Preparing!");
 
-    robust_eeprom = new Robust_EEPROM(); // FULL MEMORY ALLOCATION
+    // EEPROM ALLOCATION (USE SCENARIO) (COMMENT NOT APPLICABLE)
+    robust_eeprom = new Robust_EEPROM(); // FULL ALLOCATION
+    // robust_eeprom = new Robust_EEPROM(50, 100); // PARTIAL ALLOCATION
+
+    // DUMMY ALLOCATION (TEST SCENARIO) (COMMENT NOT APPLICABLE)
+    // dummy_eeprom = new Dummy_EEPROM(1024/4); // Avoid using all 1024 board RAM memory
+    // robust_eeprom = new Robust_EEPROM(dummy_eeprom); // FULL ALLOCATION
+    // robust_eeprom = new Robust_EEPROM(50, 100, dummy_eeprom); // PARTIAL ALLOCATION
+    
     robust_eeprom->fullreset();
 
     Serial.println("Starting!");
@@ -138,7 +147,7 @@ void loop() {
                 Serial.print(":");
             }
             Serial.println("");
-            Serial.println("length of datalength of physicallenght = data memory health");
+            Serial.println("(Allocation) of (Net Length) of (Data Length) of (Total Lenght) = (Data Memory Health)");
             Serial.print("    ");
             Serial.print(robust_eeprom->allocatedLength());
             Serial.print(" of ");
@@ -152,7 +161,7 @@ void loop() {
             Serial.println("%");
             Serial.println("");
             // Use '||' to stop at 20% or '&&' to do the full available memory test
-            if (data_health < 20 && robust_eeprom->allocatedLength() > robust_eeprom->netLength()) {
+            if (data_health < 20 && robust_eeprom->allocatedLength() == robust_eeprom->netLength()) {
                 test = result;
                 Serial.println("Finish!");
             }
