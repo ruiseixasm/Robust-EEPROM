@@ -172,6 +172,7 @@ void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
         if (tryouts > 3) {
             if (allocatedLength() < netLength()) {
                 offsetRight(virtual_byte);
+                rightestByte--; // Needs to reverse the +1 increment for each Offset operation
                 disableByte(virtual_byte);
                 tryouts = 0;
             } else // Breaks loop when available memory is depleted
@@ -204,8 +205,7 @@ void Robust_EEPROM::offsetRight (uint16_t failed_virtual_byte) {
     // for the situation resulted from an upper offset call (recursive) then
     // the new failed_virtual_byte offset was already performed by the previous iteration (kept).
     for (uint16_t data_byte = rightestByte; data_byte > failed_virtual_byte; data_byte--) // virtual for loop
-        update(data_byte + 1, read(data_byte)); // Increments +1 the rightestByte done by the write function
-    rightestByte--; // Needs to reverse the +1 increment done in the previous Offset operation
+        update(data_byte + 1, read(data_byte)); // Increments +1 the rightestByte, this will be decremented in the write function
 }
 
 void Robust_EEPROM::disableByte (uint16_t failed_virtual_byte) {
