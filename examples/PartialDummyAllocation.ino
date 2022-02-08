@@ -6,8 +6,10 @@ int length = 0;
 int data_health = 0;
 Dummy_EEPROM *dummy_eeprom;
 Robust_EEPROM *robust_eeprom;
-enum Test {testing, result, stop};
+enum Test : uint8_t {testing, result, stop};
 Test test = testing;
+enum Step : uint8_t {test1, test2, test3};
+Step step = test1;
 bool print = false;
 bool passed = true;
 
@@ -43,9 +45,6 @@ void loop() {
 
     if (test == testing) {
 
-        for (int i = 0; i < test_array_length / 2; i++)
-            robust_eeprom->update(i, rand() % 256);
-    
         if (length != robust_eeprom->netLength() || print) {
 
             print = false;
@@ -91,7 +90,8 @@ void loop() {
                 Serial.println("Finish!");
             }
             // Does a full reset at 50% to check reseting memmory
-            if (data_health == 50) {
+            if (data_health < 30 && step == test1) {
+                step = test2;
                 robust_eeprom->fullreset();
                 for (int i = 0; i < test_array_length; i++)
                     robust_eeprom->update(i, starting_data_array[i]);
@@ -100,23 +100,27 @@ void loop() {
                 for (int i = 0; i < test_array_length; i++) {
                     if (starting_data_array[i] != robust_eeprom->read(i)) {
                         passed = false;
-                        Serial.println("Failled rebuild after full reset!");
+                        Serial.println("Test 1: Failed rebuild after full reset!");
                         break;
                     }
                 }
                 if (passed == true)
-                    Serial.println("Passed rebuild after full reset!");
+                    Serial.println("Test 1: Passed rebuild after full reset!");
                 print = true;
             }
             length = robust_eeprom->netLength();
         }
         
+        if (!print)
+            for (int i = 0; i < test_array_length / 2; i++)
+                robust_eeprom->update(i, rand() % 256);
+    
     } else if (test == result) {
 
         // Check memory integrity
         for (int i = test_array_length / 2; i < test_array_length; i++) {
             if (starting_data_array[i] != robust_eeprom->read(i)) {
-                Serial.println("Failled preservation of unchanged data!");
+                Serial.println("Test 2: Failed preservation of unchanged data!");
                 passed = false;
                 break;
             }
