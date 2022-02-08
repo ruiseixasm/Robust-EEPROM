@@ -164,27 +164,33 @@ uint8_t Robust_EEPROM::read (uint16_t virtual_byte) {
 }
 
 void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
-    rightestByte = max(virtual_byte, rightestByte); // New data commited to be allocated (preserved)
-    uint8_t tryouts = 0;
-    do {
-        tryouts++;
-        if (tryouts > 3) {
-            if (offsetRight(virtual_byte) != depleted)
-                tryouts = 1;
-            else // Breaks loop when available memory is depleted (avoids infinite loop)
-                break;
-        }
-        if (dummy_eeprom == nullptr)
-            EEPROM.write(physicalByte(virtual_byte), data);
-        else
-            dummy_eeprom->write(physicalByte(virtual_byte), data);
-    } while (read(virtual_byte) != data);
+    if (virtual_byte < netBytes) {
+        rightestByte = max(virtual_byte, rightestByte); // New data commited to be allocated (preserved)
+        uint8_t tryouts = 0;
+        do {
+            tryouts++;
+            if (tryouts > 3) {
+                if (offsetRight(virtual_byte) != depleted)
+                    tryouts = 1;
+                else // Breaks loop when available memory is depleted (avoids infinite loop)
+                    break;
+            }
+            if (dummy_eeprom == nullptr)
+                EEPROM.write(physicalByte(virtual_byte), data);
+            else
+                dummy_eeprom->write(physicalByte(virtual_byte), data);
+        } while (read(virtual_byte) != data);
+    }
 }
 
 void Robust_EEPROM::update (uint16_t virtual_byte, uint8_t data) {
-    rightestByte = max(virtual_byte, rightestByte); // New data commited to be allocated (preserved)
-    if (read(virtual_byte) != data)
-        write(virtual_byte, data);
+    if (virtual_byte < netBytes) {
+        if (read(virtual_byte) != data)
+            write(virtual_byte, data);
+        else
+            rightestByte = max(virtual_byte, rightestByte); // New data commited to be allocated (preserved)
+    }
+
 }
 
 void Robust_EEPROM::fullreset () {
