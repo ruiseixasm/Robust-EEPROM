@@ -12,7 +12,8 @@
 */
 #include "Robust_EEPROM.h"
 
-#pragma region Dummy_EEPROM
+
+// Dummy_EEPROM Functions ---------------------------------------------------------------------------------
 
 uint16_t Dummy_EEPROM::seed_generator (uint32_t total_duration, uint32_t fragmental_duration) {
     uint16_t magic_number = 0;
@@ -69,11 +70,9 @@ void Dummy_EEPROM::update (uint16_t physical_byte, uint8_t data) {
         write(physical_byte, data);
 }
 
-#pragma endregion Dummy_EEPROM
 
 
-
-#pragma region Robust_EEPROM
+// Robust_EEPROM Functions ---------------------------------------------------------------------------------
 
 Robust_EEPROM::Robust_EEPROM (uint16_t firstByte, uint16_t lengthBytes, Dummy_EEPROM* const dummy_eeprom) {
     this->dummy_eeprom = dummy_eeprom;
@@ -170,11 +169,9 @@ void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
     do {
         tryouts++;
         if (tryouts > 3) {
-            if (allocatedLength() < netLength()) {
-                offsetRight(virtual_byte);
-                disableByte(virtual_byte);
+            if (offsetRight(virtual_byte) != depleted)
                 tryouts = 1;
-            } else // Breaks loop when available memory is depleted (avoids infinite loop)
+            else // Breaks loop when available memory is depleted (avoids infinite loop)
                 break;
         }
         if (dummy_eeprom == nullptr)
@@ -200,13 +197,37 @@ void Robust_EEPROM::fullreset () {
     netBytes = dataLength(); // Resets the total amount of available Bytes to maximum
 }
 
-void Robust_EEPROM::offsetRight (uint16_t failed_virtual_byte) {
-    // The failed_virtual_byte contains outdated data so no offset needed for it,
-    // for the situation resulted from an upper offset call (recursive) then
-    // the new failed_virtual_byte offset was already performed by the previous iteration (kept).
-    for (uint16_t data_byte = rightestByte; data_byte > failed_virtual_byte; data_byte--) // loop of virtual bytes
-        update(data_byte + 1, read(data_byte)); // Increments +1 the rightestByte (done by the update function)
-    rightestByte--; // Needs to reverse the +1 increment of the previous Offset operation
+Robust_EEPROM::State Robust_EEPROM::offsetRight (uint16_t failed_virtual_byte) {
+    State state = offsetting;
+    if (allocatedLength() < netLength()) {
+        disableByte(failed_virtual_byte); // Starts by disabling the failed byte (data to be replaced anyway) (root failed byte)
+        while (state == offsetting) {
+            for (uint16_t data_byte = rightestByte; data_byte > failed_virtual_byte; data_byte--) { // loop of virtual bytes
+                for (uint8_t tryout = 0; tryout < 3; tryout++) {
+                    if (dummy_eeprom == nullptr)
+                        EEPROM.update(physicalByte(data_byte), read(data_byte - 1));
+                    else
+                        dummy_eeprom->update(physicalByte(data_byte), read(data_byte - 1));
+                    if (read(data_byte) == read(data_byte - 1))
+                        break;
+                }
+                if (read(data_byte) != read(data_byte - 1)) {
+                    if (allocatedLength() < netLength())
+                        disableByte(data_byte); // If there is a new failed byte then disable it (already copied) (tail failed byte)
+                    else
+                        state = depleted;
+                    break; // Exit this loop to restart a new one!
+                } else if (data_byte - 1 == failed_virtual_byte) {
+                    if (allocatedLength() < netLength())
+                        state = available;
+                    else
+                        state = depleted;
+                }
+            }
+        }
+    } else
+        state = depleted;
+    return state;
 }
 
 void Robust_EEPROM::disableByte (uint16_t failed_virtual_byte) {
@@ -223,5 +244,3 @@ void Robust_EEPROM::disableByte (uint16_t failed_virtual_byte) {
     }
     netBytes--; // Decrements the total amount of available Bytes
 }
-
-#pragma endregion Robust_EEPROM

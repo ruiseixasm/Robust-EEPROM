@@ -32,6 +32,8 @@ class Dummy_EEPROM {
 };
 
 class Robust_EEPROM {
+    public:
+        enum State : uint8_t {depleted, offsetting, available};
     private:
         Dummy_EEPROM *dummy_eeprom = nullptr;
         uint16_t firstByte = 0;
@@ -39,7 +41,7 @@ class Robust_EEPROM {
         uint16_t netBytes;
         uint16_t rightestByte = 0; // Stops new memory allocation when all working Data Bytes become depleted
         void setNetBytes();
-        void offsetRight(uint16_t);
+        State offsetRight(uint16_t);
         void disableByte(uint16_t);
     public:
         Robust_EEPROM(uint16_t, uint16_t, Dummy_EEPROM*);
