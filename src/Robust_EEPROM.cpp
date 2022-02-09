@@ -205,9 +205,9 @@ void Robust_EEPROM::fullreset () {
 }
 
 Robust_EEPROM::State Robust_EEPROM::offsetRight (uint16_t failed_virtual_byte) {
-    State state = offsetting;
     if (allocatedLength() < netLength()) {
         disableByte(failed_virtual_byte); // Starts by disabling the failed byte (data to be replaced anyway) (root failed byte)
+        State state = offsetting;
         while (state == offsetting) {
             for (uint16_t data_byte = rightestByte; data_byte > failed_virtual_byte; data_byte--) { // loop of virtual bytes
                 for (uint8_t tryout = 0; tryout < 3; tryout++) {
@@ -218,13 +218,13 @@ Robust_EEPROM::State Robust_EEPROM::offsetRight (uint16_t failed_virtual_byte) {
                     if (read(data_byte) == read(data_byte - 1))
                         break;
                 }
-                if (read(data_byte) != read(data_byte - 1)) {
+                if (read(data_byte) != read(data_byte - 1)) { // Check if it's a new failed byte
                     if (allocatedLength() < netLength())
                         disableByte(data_byte); // If there is a new failed byte then disable it (already copied) (tail failed byte)
                     else
                         state = depleted;
-                    break; // Exit this loop to restart a new one!
-                } else if (data_byte - 1 == failed_virtual_byte) {
+                    break; // Exit this for loop to restart a new one!
+                } else if (data_byte - 1 == failed_virtual_byte) { // When the entire offsetting is concluded
                     if (allocatedLength() < netLength())
                         state = available;
                     else
@@ -232,9 +232,9 @@ Robust_EEPROM::State Robust_EEPROM::offsetRight (uint16_t failed_virtual_byte) {
                 }
             }
         }
+        return state;
     } else
-        state = depleted;
-    return state;
+        return depleted;
 }
 
 void Robust_EEPROM::disableByte (uint16_t failed_virtual_byte) {
