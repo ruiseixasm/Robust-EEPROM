@@ -1,8 +1,8 @@
 #include <Robust_EEPROM.h>
 
-int test_array_length = 10;
+unsigned short int test_array_length = 10;
 int *starting_data_array;  
-int last_net_length = 0;
+unsigned int last_net_length = 0;
 int data_health = 0;
 char BUFFERNUMBER[4];
 Dummy_EEPROM *dummy_eeprom;
@@ -33,11 +33,11 @@ void setup() {
     
     robust_eeprom->fullreset();
 
-    for (int i = 0; i < test_array_length; i++)
+    for (unsigned short int i = 0; i < test_array_length; i++)
         robust_eeprom->update(i, rand() % 256);
         
     starting_data_array = new int[test_array_length];
-    for (int i = 0; i < test_array_length; i++)
+    for (unsigned short int i = 0; i < test_array_length; i++)
         starting_data_array[i] = robust_eeprom->read(i);
 
 }
@@ -59,7 +59,7 @@ void printInfo (Info info) {
             break;
     }
     Serial.print("\t");
-    for (int i = 0; i < test_array_length; i++) {
+    for (unsigned short int i = 0; i < test_array_length; i++) {
         switch (info) {
             case virtual_addresses:
                 sprintf (BUFFERNUMBER, "%3d", i);
@@ -119,12 +119,12 @@ void loop() {
             if (data_health < 25 && step == test1) {
                 step = test2;
                 robust_eeprom->fullreset();
-                for (int i = 0; i < test_array_length; i++)
+                for (unsigned short int i = 0; i < test_array_length; i++)
                     robust_eeprom->update(i, starting_data_array[i]);
                 printFullInfo();
                 // Check memory integrity
                 Serial.println("");
-                for (int i = 0; i < test_array_length; i++) {
+                for (unsigned short int i = 0; i < test_array_length; i++) {
                     if (starting_data_array[i] != robust_eeprom->read(i)) {
                         passed = false;
                         Serial.print("Test 1: Failed rebuilding original data after full reset! <<!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -143,14 +143,14 @@ void loop() {
             last_net_length = robust_eeprom->netLength();
         }
         
-        for (int i = 0; i < test_array_length / 2; i++) // First half data randomly generated (volatile)
+        for (unsigned short int i = 0; i < test_array_length / 2; i++) // First half data randomly generated (volatile)
             robust_eeprom->update(i, rand() % 256);
     
     } else if (test == result) {
 
         // Check memory integrity
         Serial.println("");
-        for (int i = test_array_length / 2; i < test_array_length; i++) {
+        for (unsigned short int i = test_array_length / 2; i < test_array_length; i++) {
             if (starting_data_array[i] != robust_eeprom->read(i)) {
                 Serial.print("Test 2: Failed preservation of unchanged data! <<!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 passed = false;
