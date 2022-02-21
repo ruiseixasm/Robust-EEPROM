@@ -1,4 +1,4 @@
-## **Robust-EEPROM Library V2.1.0** for Arduino
+## **Robust-EEPROM Library V2.1.1** for Arduino
 **Written by:** _Rui Seixas Monteiro_.
 
 ## Installation
