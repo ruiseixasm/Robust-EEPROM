@@ -167,12 +167,12 @@ uint8_t Robust_EEPROM::read (uint16_t virtual_byte) {
 void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
     if (virtual_byte < netBytes) {
         rightestByte = max(virtual_byte, rightestByte); // New data commited to be allocated (preserved)
-        uint8_t tryouts = 0;
+        uint8_t tryout = 0;
         do {
-            tryouts++;
-            if (tryouts > 3) {
+            tryout++;
+            if (tryout > 3) {
                 if (offsetRight(virtual_byte) != depleted)
-                    tryouts = 1;
+                    tryout = 1;
                 else // Breaks loop when available memory is depleted (avoids infinite loop)
                     break;
             }
