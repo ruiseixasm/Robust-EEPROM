@@ -244,10 +244,12 @@ void Robust_EEPROM::disableByte (uint16_t failed_virtual_byte) {
     // physical processing on control Bytes
     if (dummy_eeprom == nullptr) {
         control_data = EEPROM.read(firstByte + dataLength() + (uint16_t)(data_byte/8)) | 0b00000001 << data_byte % 8;
-        EEPROM.update(firstByte + dataLength() + (uint16_t)(data_byte/8), control_data);
+        for (uint8_t tryout = 0; tryout < 3; tryout++)
+            EEPROM.update(firstByte + dataLength() + (uint16_t)(data_byte/8), control_data);
     } else {
         control_data = dummy_eeprom->read(firstByte + dataLength() + (uint16_t)(data_byte/8)) | 0b00000001 << data_byte % 8;
-        dummy_eeprom->update(firstByte + dataLength() + (uint16_t)(data_byte/8), control_data);
+        for (uint8_t tryout = 0; tryout < 3; tryout++)
+            dummy_eeprom->update(firstByte + dataLength() + (uint16_t)(data_byte/8), control_data);
     }
     netBytes--; // Decrements the total amount of available Bytes
 }
