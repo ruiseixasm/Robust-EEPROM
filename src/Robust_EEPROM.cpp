@@ -13,7 +13,6 @@
 #include "Robust_EEPROM.h"
 
 
-
 // Dummy_EEPROM Functions ---------------------------------------------------------------------------------
 
 uint16_t Dummy_EEPROM::seed_generator (uint32_t total_duration, uint32_t fragmental_duration) {
@@ -72,7 +71,6 @@ void Dummy_EEPROM::update (uint16_t physical_byte, uint8_t data) {
 }
 
 
-
 // Robust_EEPROM Functions ---------------------------------------------------------------------------------
 
 Robust_EEPROM::Robust_EEPROM (uint16_t firstByte, uint16_t lengthBytes, Dummy_EEPROM* const dummy_eeprom) {
@@ -101,12 +99,9 @@ Robust_EEPROM::Robust_EEPROM () {
 
 void Robust_EEPROM::setNetBytes () {
     uint16_t disabled_bytes = 0;
-    uint8_t control_data = 0;
+    uint8_t control_data;
     for (uint16_t control_byte = 0; control_byte < controlLength(); control_byte++) { // loop of physical bytes
-        if (dummy_eeprom == nullptr)
-            control_data = EEPROM.read(firstByte + dataLength() + control_byte);
-        else
-            control_data = dummy_eeprom->read(firstByte + dataLength() + control_byte);
+        control_data = physicalRead(firstByte + dataLength() + control_byte);
         for (uint8_t control_bit = 0; control_bit < min(dataLength() - 8*control_byte, 8); control_bit++)
             disabled_bytes += control_data >> control_bit & 0b00000001;
     }
@@ -137,10 +132,7 @@ uint16_t Robust_EEPROM::physicalByte (uint16_t virtual_byte) {
     uint16_t physical_byte = 0;
     uint8_t control_data;
     for (uint16_t control_byte = 0; control_byte < controlLength(); control_byte++) { // loop of physical bytes
-        if (dummy_eeprom == nullptr)
-            control_data = EEPROM.read(firstByte + dataLength() + control_byte);
-        else
-            control_data = dummy_eeprom->read(firstByte + dataLength() + control_byte);
+        control_data = physicalRead(firstByte + dataLength() + control_byte);
         for (uint8_t control_bit = 0; control_bit < min(dataLength() - 8*control_byte, 8); control_bit++) {
             virtual_byte += control_data >> control_bit & 0b00000001; // jumps all disabled bytes
             if (virtual_byte == 0 || physical_byte == dataLength() - 1) {
@@ -155,12 +147,9 @@ uint16_t Robust_EEPROM::physicalByte (uint16_t virtual_byte) {
 }
 
 uint8_t Robust_EEPROM::read (uint16_t virtual_byte) {
-    if (virtual_byte < netBytes) {
-        if (dummy_eeprom == nullptr)
-            return EEPROM.read(physicalByte(virtual_byte));
-        else
-            return dummy_eeprom->read(physicalByte(virtual_byte));
-    } else
+    if (virtual_byte < netBytes)
+        return physicalRead(physicalByte(virtual_byte));
+    else
         return 0; // For out of scope read data requests
 }
 
@@ -176,10 +165,7 @@ void Robust_EEPROM::write (uint16_t virtual_byte, uint8_t data) {
                 else // Breaks loop when available memory is depleted (avoids infinite loop)
                     break;
             }
-            if (dummy_eeprom == nullptr)
-                EEPROM.write(physicalByte(virtual_byte), data);
-            else
-                dummy_eeprom->write(physicalByte(virtual_byte), data);
+            physicalWrite(physicalByte(virtual_byte), data);
         } while (read(virtual_byte) != data);
     }
 }
@@ -195,12 +181,8 @@ void Robust_EEPROM::update (uint16_t virtual_byte, uint8_t data) {
 }
 
 void Robust_EEPROM::fullreset () {
-    if (dummy_eeprom == nullptr)
-        for (uint16_t physical_byte = firstByte; physical_byte < firstByte + totalBytes; physical_byte++)
-            EEPROM.update(physical_byte, 0);
-    else
-        for (uint16_t physical_byte = firstByte; physical_byte < firstByte + totalBytes; physical_byte++)
-            dummy_eeprom->update(physical_byte, 0);
+    for (uint16_t physical_byte = firstByte; physical_byte < firstByte + totalBytes; physical_byte++)
+        physicalUpdate(physical_byte, 0);
     netBytes = dataLength(); // Resets the total amount of available Bytes to maximum
 }
 
@@ -211,10 +193,7 @@ Robust_EEPROM::State Robust_EEPROM::offsetRight (uint16_t failed_virtual_byte) {
         while (state == offsetting) {
             for (uint16_t data_byte = rightestByte; data_byte > failed_virtual_byte; data_byte--) { // loop of virtual bytes
                 for (uint8_t tryout = 0; tryout < 3; tryout++) {
-                    if (dummy_eeprom == nullptr)
-                        EEPROM.update(physicalByte(data_byte), read(data_byte - 1));
-                    else
-                        dummy_eeprom->update(physicalByte(data_byte), read(data_byte - 1));
+                    physicalUpdate(physicalByte(data_byte), read(data_byte - 1));
                     if (read(data_byte) == read(data_byte - 1))
                         break;
                 }
@@ -242,14 +221,29 @@ void Robust_EEPROM::disableByte (uint16_t failed_virtual_byte) {
     uint16_t data_byte = physicalByte(failed_virtual_byte) - firstByte;
     uint8_t control_data;
     // physical processing on control Bytes
-    if (dummy_eeprom == nullptr) {
-        control_data = EEPROM.read(firstByte + dataLength() + (uint16_t)(data_byte/8)) | 0b00000001 << data_byte % 8;
-        for (uint8_t tryout = 0; tryout < 3; tryout++)
-            EEPROM.update(firstByte + dataLength() + (uint16_t)(data_byte/8), control_data);
-    } else {
-        control_data = dummy_eeprom->read(firstByte + dataLength() + (uint16_t)(data_byte/8)) | 0b00000001 << data_byte % 8;
-        for (uint8_t tryout = 0; tryout < 3; tryout++)
-            dummy_eeprom->update(firstByte + dataLength() + (uint16_t)(data_byte/8), control_data);
-    }
+    control_data = physicalRead(firstByte + dataLength() + (uint16_t)(data_byte/8)) | 0b00000001 << data_byte % 8;
+    for (uint8_t tryout = 0; tryout < 3; tryout++)
+        physicalUpdate(firstByte + dataLength() + (uint16_t)(data_byte/8), control_data);
     netBytes--; // Decrements the total amount of available Bytes
+}
+
+uint8_t Robust_EEPROM::physicalRead (uint16_t physical_byte) {
+    if (dummy_eeprom == nullptr)
+        return EEPROM.read(physical_byte);
+    else
+        return dummy_eeprom->read(physical_byte);
+}
+
+void Robust_EEPROM::physicalWrite (uint16_t physical_byte, uint8_t data) {
+    if (dummy_eeprom == nullptr)
+        EEPROM.write(physical_byte, data);
+    else
+        dummy_eeprom->write(physical_byte, data);
+}
+
+void Robust_EEPROM::physicalUpdate (uint16_t physical_byte, uint8_t data) {
+    if (dummy_eeprom == nullptr)
+        EEPROM.update(physical_byte, data);
+    else
+        dummy_eeprom->update(physical_byte, data);
 }

@@ -22,13 +22,13 @@ class Dummy_EEPROM {
         uint16_t *ttl_bytes;
         uint16_t size;
     public:
-        Dummy_EEPROM(uint16_t);
+        Dummy_EEPROM(uint16_t size);
         ~Dummy_EEPROM();
         uint16_t length();
-        uint8_t read(uint16_t);
-        void write(uint16_t, uint8_t);
-        void update(uint16_t, uint8_t);
-        static uint16_t seed_generator(uint32_t=1000, uint32_t=50);
+        uint8_t read(uint16_t physical_byte);
+        void write(uint16_t physical_byte, uint8_t data);
+        void update(uint16_t physical_byte, uint8_t data);
+        static uint16_t seed_generator(uint32_t total_duration=1000, uint32_t fragmental_duration=50);
 };
 
 class Robust_EEPROM {
@@ -43,20 +43,23 @@ class Robust_EEPROM {
         void setNetBytes();
         State offsetRight(uint16_t);
         void disableByte(uint16_t);
+        uint8_t physicalRead(uint16_t physical_byte);
+        void physicalWrite(uint16_t physical_byte, uint8_t data);
+        void physicalUpdate(uint16_t physical_byte, uint8_t data);
     public:
-        Robust_EEPROM(uint16_t, uint16_t, Dummy_EEPROM*);
-        Robust_EEPROM(Dummy_EEPROM*);
-        Robust_EEPROM(uint16_t, uint16_t);
+        Robust_EEPROM(uint16_t firstByte, uint16_t lengthBytes, Dummy_EEPROM* const dummy_eeprom);
+        Robust_EEPROM(Dummy_EEPROM* const dummy_eeprom);
+        Robust_EEPROM(uint16_t firstByte, uint16_t lengthBytes);
         Robust_EEPROM();
         uint16_t netLength();
         uint16_t allocatedLength();
         uint16_t totalLength();
         uint16_t controlLength();
         uint16_t dataLength();
-        uint16_t physicalByte(uint16_t);
-        uint8_t read(uint16_t);
-        void write(uint16_t, uint8_t);
-        void update(uint16_t, uint8_t);
+        uint16_t physicalByte(uint16_t virtual_byte);
+        uint8_t read(uint16_t virtual_byte);
+        void write(uint16_t virtual_byte, uint8_t data);
+        void update(uint16_t virtual_byte, uint8_t data);
         void fullreset();
 };
 
