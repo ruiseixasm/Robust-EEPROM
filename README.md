@@ -51,23 +51,23 @@ help prevent unnecessary wear on the EEPROM cells.
 This function does not return any value.
 
 #### **`Robust_EEPROM.fullreset()`**
-This functions zeroes the entire physical memory associated to the virtual one.
+This function zeroes the entire physical memory associated to the virtual one.
 
 #### **`Robust_EEPROM.controlLength()`**
-This functions returns an `unsigned int` with the amount of control bytes.
+This function returns an `unsigned int` with the amount of control bytes.
 
 #### **`Robust_EEPROM.dataLength()`**
-This functions returns an `unsigned int` with the amount of data bytes used as virtual data memory.
+This function returns an `unsigned int` with the amount of data bytes used as virtual data memory.
 
 #### **`Robust_EEPROM.physicalLength()`**
-This functions returns an `unsigned int` with the amount of physical bytes used by the entire virtual memory.
+This function returns an `unsigned int` with the amount of physical bytes used by the entire virtual memory.
 
 #### **`Robust_EEPROM.netLength()`**
-This functions returns an `unsigned int` with the amount of bytes still availlable for the data virtual memory.
+This function returns an `unsigned int` with the amount of bytes still availlable for the data virtual memory.
 As physical memory bytes start to fail this memory decreses in size down to zero.
 
 #### **`Robust_EEPROM.allocatedLength()`**
-This functions returns an `unsigned int` with the amount of bytes being used by virtual memory.
+This function returns an `unsigned int` with the amount of bytes being used by virtual memory.
 As new data is added this value increases up to the total extent of the written data on virtual memory.
 
 #### **`Robust_EEPROM.physicalByte( virtual_address )`**
